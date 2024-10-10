@@ -1,9 +1,14 @@
+import 'package:countdown_event/provider/NotificationProvider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../provider/DateTimeProvider.dart';
 
 class AddNotificationDialog extends StatefulWidget {
-  const AddNotificationDialog({super.key});
+  late DateTime eventDate;
+  AddNotificationDialog({super.key, required this.eventDate});
 
   @override
   State<AddNotificationDialog> createState() => _AddNotificationDialogState();
@@ -12,10 +17,18 @@ class AddNotificationDialog extends StatefulWidget {
 class _AddNotificationDialogState extends State<AddNotificationDialog> {
   final List<String> _unitList = ["Months", "Weeks", "Days", "Hours"];
 
-  DateTime date = DateTime(2025, DateTime.october);
+  late DateTime date;
+  late DateTime notificationDate;
+
+  @override
+  void initState() {
+    super.initState();
+    date = widget.eventDate;
+    notificationDate = date;
+  }
 
   String _selectedUnit = "Months";
-  late int _selectedTime;
+  int _selectedTime = 1;
 
   List<int> _generateTimeList(String unit) {
     int timeDiff = 0;
@@ -24,30 +37,53 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
     switch (unit) {
       case "Months":
         timeDiff = date.month - dateNow.month + 12 * (date.year - dateNow.year);
+        break;
       case "Weeks":
         timeDiff = date.difference(dateNow).inDays ~/ 7;
+        break;
       case "Days":
         timeDiff = date.difference(dateNow).inDays;
+        break;
       case "Hours":
         timeDiff = date.difference(dateNow).inHours;
+        break;
     }
 
-    return List<int>.generate(timeDiff, (i) => i++);
+    return List<int>.generate(timeDiff, (i) => i + 1); // Start from 1
   }
 
   DateFormat f = DateFormat('MMM d, y - hh:mm a');
-  DateTime notificationDate = DateTime(2025, DateTime.october);
 
   _calculateNotifyDate() {
+    final dateNow = DateTime.now(); // Current date
+
+    // Reset notification date to the event date before calculating again
+    notificationDate = date;
+
     switch (_selectedUnit) {
       case "Months":
-        notificationDate = date.subtract(Duration(days: _selectedTime * 30));
+        notificationDate = DateTime(
+          date.year,
+          date.month - _selectedTime,
+          date.day,
+          date.hour,
+          date.minute,
+        );
+        break;
       case "Weeks":
         notificationDate = date.subtract(Duration(days: _selectedTime * 7));
+        break;
       case "Days":
         notificationDate = date.subtract(Duration(days: _selectedTime));
+        break;
       case "Hours":
         notificationDate = date.subtract(Duration(hours: _selectedTime));
+        break;
+    }
+
+    // Ensure the notification date is not in the past
+    if (notificationDate.isBefore(dateNow)) {
+      notificationDate = dateNow;
     }
   }
 
@@ -65,11 +101,11 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Padding(
-              padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 15),
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 15),
               child: Text(
-                "Event Date: Oct 15 2024 - 04-00:pm",
-                style: TextStyle(
+                "Event Date: ${f.format(date)}",
+                style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: Colors.white),
@@ -85,7 +121,8 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
                           itemExtent: 50.0,
                           onSelectedItemChanged: (index) {
                             setState(() {
-                              _selectedTime = index;
+                              _selectedTime = notifyDates[_selectedUnit]![
+                                  index]; // Fix here
                               _calculateNotifyDate();
                             });
                           },
@@ -133,13 +170,17 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
               padding: const EdgeInsets.all(8.0),
               child: IconButton(
                 onPressed: () {
+                  Navigator.pop(context);
+                  Provider.of<NotificationProvider>(context, listen: false)
+                      .addNotification(notificationDate);
                 },
                 style: ButtonStyle(
                     shape: MaterialStateProperty.all(RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
                     backgroundColor: MaterialStateProperty.all(Colors.purple)),
                 icon: const Icon(
-                  Icons.check_circle, color: Colors.white,
+                  Icons.check_circle,
+                  color: Colors.white,
                 ),
               ),
             )

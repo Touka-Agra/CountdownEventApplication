@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import '../models/event.dart';
 import '../provider/DateTimeProvider.dart';
 import '../provider/EventProvider.dart';
-import '../widgets/AddNotification_dialog.dart';
+import '../provider/NotificationProvider.dart';
+import '../widgets/DateTimeSetterWidget.dart';
+import '../widgets/NotificationWidget.dart';
 
 class EventForm extends StatefulWidget {
   const EventForm({super.key});
@@ -21,32 +23,15 @@ class _EventFormState extends State<EventForm> {
 
   Color c = Colors.purple;
 
-  List<String> notifications = [
-    "Before 1 week",
-    "Before 1 month",
-    "Before 2 week"
-  ];
-
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
   String typingTitle = "";
 
-  DateFormat format=DateFormat('MMM d, y - hh:mm a');
-
-  bool wantNotify = true;
+  bool needEndDate = false;
 
   @override
   Widget build(BuildContext context) {
-
-    DateTime dateTime = Provider.of<DateTimeProvider>(context , listen:false).dateTime;
-
-    Future<DateTime?> _pickDate() async => showDatePicker(
-        context: context, initialDate: dateTime, firstDate: DateTime.now(), lastDate: DateTime(2100));
-
-    Future<TimeOfDay?> _pickTime() async => showTimePicker(
-        context: context, initialTime:TimeOfDay(hour: dateTime.hour, minute: dateTime.minute));
-
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
@@ -80,16 +65,55 @@ class _EventFormState extends State<EventForm> {
                           onPressed: () {
                             Event event = Event(
                                 title: _titleController.text,
-                                details: _descriptionController.text);
-                            if (_formKey.currentState!.validate()) {
-                              Navigator.pop(context);
-                              Provider.of<EventProvider>(context, listen: false)
-                                  .addEvent(event);
+                                details: _descriptionController.text,
+                                dateTime: Provider.of<DateTimeProvider>(context,
+                                        listen: false)
+                                    .dateTime,
+                                needEndDate: needEndDate,
+                                needNotify: true);
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text('Event is added successfully')));
+                            if (needEndDate) {
+                              event.endDateTime = Provider.of<DateTimeProvider>(
+                                      context,
+                                      listen: false)
+                                  .endDateTime;
+                            }
+                            event.notifications =
+                                Provider.of<NotificationProvider>(context,
+                                        listen: false)
+                                    .notifications;
+
+                            if (Provider.of<DateTimeProvider>(context,
+                                        listen: false)
+                                    .isValidEndDate ||
+                                !needEndDate) {
+                              if (_formKey.currentState!.validate()) {
+                                Navigator.pop(context);
+                                Provider.of<EventProvider>(context,
+                                        listen: false)
+                                    .addEvent(event);
+
+                                Provider.of<NotificationProvider>(context,
+                                        listen: false)
+                                    .notifications = [];
+
+                                    Provider.of<DateTimeProvider>(context,
+                                        listen: false)
+                                    .restartDate();
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'Event is added successfully')));
+                              }
+                            } else {
+                              Navigator.pop(context);
+
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(
+                                content:
+                                    Text('Unfortunatlly,Event is not added'),
+                              ));
                             }
                           },
                           style: ButtonStyle(
@@ -154,63 +178,45 @@ class _EventFormState extends State<EventForm> {
                       ),
                     ),
 
-                    //countdown
+                    //set date
                     Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: Consumer<DateTimeProvider>(
-                        builder: (context , dateTimeProvider , child){
-                          return Row(
+                      child: DateTimeSetterWidget(isStart: true),
+                    ),
+
+                    //end date
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Consumer<EventProvider>(
+                          builder: (context, eventProvider, child) {
+                        return Opacity(
+                          opacity: needEndDate ? 1.0 : 0.5,
+                          child: Column(
                             children: [
-                              Container(
-                                  decoration: BoxDecoration(
-                                      color: Colors.grey[700],
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                          onPressed: () async {
-                                            final newDate=await _pickDate();
-                                            if(newDate==null)return;
-                                            dateTimeProvider.setDate(newDate);
-                                          },
-                                          icon: Icon(Icons.date_range)),
-                                      IconButton(
-                                          onPressed: () async {
-                                            _pickTime();
-                                            final newTime=await _pickDate();
-                                            if(newTime==null)return;
-                                            dateTimeProvider.setTime(newTime);
-                                          },
-                                          icon: Icon(Icons.timer_outlined)),
-                                    ],
-                                  )),
-                              const SizedBox(width: 8),
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.grey[700],
-                                    borderRadius: BorderRadius.circular(15)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(format.format(dateTimeProvider.dateTime),
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.grey[400],
-                                              fontSize: 15)),
-                                    ],
+                              CheckboxListTile(
+                                  value: needEndDate,
+                                  checkColor: c,
+                                  title: const Text(
+                                    "Set End Date",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
                                   ),
+                                  onChanged: (value) {
+                                    needEndDate = value!;
+                                    eventProvider.setNeedEndDate();
+                                  }),
+                              IgnorePointer(
+                                ignoring: !needEndDate,
+                                child: DateTimeSetterWidget(
+                                  isStart: false,
                                 ),
                               ),
                             ],
-                          );
-                        }
-                      ),
+                          ),
+                        );
+                      }),
                     ),
 
                     //description
@@ -243,91 +249,7 @@ class _EventFormState extends State<EventForm> {
                     ),
 
                     //notification
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          //notification and icon
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text("Set Notification",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold)),
-                                Switch(
-                                    value: (wantNotify),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        wantNotify = value;
-                                      });
-                                    },
-                                    activeColor: c,
-                                    thumbIcon:
-                                        MaterialStateProperty.resolveWith<
-                                            Icon?>((Set<MaterialState> states) {
-                                      if (states
-                                          .contains(MaterialState.selected)) {
-                                        return const Icon(
-                                            Icons.notifications_active);
-                                      }
-                                      return null;
-                                    }))
-                              ],
-                            ),
-                          ),
-
-                          //notifyList
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: notifications.length,
-                                itemBuilder: (context, index) {
-                                  return _buildNotification(
-                                      notifications[index]);
-                                }),
-                          ),
-
-                          //add Notification Button
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                                child: TextButton(
-                              onPressed: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) =>
-                                        AddNotificationDialog());
-                              },
-                              style: ButtonStyle(
-                                  shape: MaterialStateProperty.all(
-                                      RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15))),
-                                  backgroundColor:
-                                      MaterialStateProperty.all(Colors.purple)),
-                              child: const Padding(
-                                padding: EdgeInsets.all(5.0),
-                                child: Text(
-                                  "Add Notification",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      fontSize: 15),
-                                ),
-                              ),
-                            )),
-                          )
-                        ],
-                      ),
-                    ),
+                    NotificationWidget()
                   ],
                 )),
               ),
@@ -345,56 +267,4 @@ Widget _buildTitle(String title) {
     style: TextStyle(
         fontWeight: FontWeight.bold, color: Colors.grey[400], fontSize: 10),
   ));
-}
-
-Widget _buildTimer(
-    {required Widget first, required Widget second, required String title}) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 5),
-    child: Column(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-              color: Colors.white54, borderRadius: BorderRadius.circular(10)),
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              children: [first, second],
-            ),
-          ),
-        ),
-        SizedBox(height: 8),
-        _buildTitle(title),
-      ],
-    ),
-  );
-}
-
-Widget _buildNotification(String time) {
-  return Padding(
-      padding: const EdgeInsets.all(5.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.blueGrey,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Text(
-              time,
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.cancel,
-              color: Colors.white,
-              size: 25,
-            ),
-          ),
-        ]),
-      ));
 }

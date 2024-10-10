@@ -18,12 +18,18 @@ class Eventt {
 }
 
 class Event {
-  final String title;
-  final String details;
-  //late List<Notify> notification;
+  String title;
+  String details;
+  bool needEndDate;
+  DateTime dateTime;
+  DateTime endDateTime = DateTime(0);
+  List<DateTime> notifications = [];
+  bool needNotify;
 
-  Event({
-    required this.title,
-    required this.details,
-  });
+  Event(
+      {required this.title,
+      required this.details,
+      required this.dateTime,
+      required this.needEndDate,
+      required this.needNotify});
 }
