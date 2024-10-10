@@ -1,4 +1,6 @@
+import 'package:countdown_event/provider/NotificationProvider.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/event.dart';
@@ -8,7 +10,9 @@ import '../provider/EventProvider.dart';
 class EventWidget extends StatelessWidget {
   final Event event;
 
-  const EventWidget({super.key, required this.event});
+  EventWidget({super.key, required this.event});
+
+  DateFormat format = DateFormat('MMM d, y - hh:mm a');
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +34,7 @@ class EventWidget extends StatelessWidget {
                   BoxShadow(
                       color: Colors.amber,
                       blurRadius: 10,
-                      offset: Offset(0,3)
-
-
-                  ),
+                      offset: Offset(0, 3)),
                 ]),
             child: const Padding(
               padding: EdgeInsets.all(8.0),
@@ -62,7 +63,7 @@ class EventWidget extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => EventDetailsScreen()));
+                      builder: (context) => EventDetailsScreen(event: event,)));
             },
             child: Container(
               padding: const EdgeInsets.all(15),
@@ -96,22 +97,32 @@ class EventWidget extends StatelessWidget {
                       const SizedBox(height: 5),
                       Row(
                         children: [
-                          IconButton(
-                            onPressed: () {},
-                            style: ButtonStyle(
-                              backgroundColor:
-                              MaterialStateProperty.all(Colors.white24),
-                              shape: MaterialStateProperty.all(
-                                  const CircleBorder()),
-                            ),
-                            icon: const Icon(
-                              Icons.notifications_active,
-                              color: Colors.purple,
-                              size: 20,
-                            ),
-                          ),
+                          Consumer<NotificationProvider>(
+                              builder: (context, notificationProvider, child) {
+                            return IconButton(
+                              onPressed: () {
+                                event.needNotify = notificationProvider
+                                    .wantNotifyToggle(event.needNotify);
+
+                                notificationProvider.setWantNotify();
+                              },
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.white24),
+                                shape: MaterialStateProperty.all(
+                                    const CircleBorder()),
+                              ),
+                              icon: Icon(
+                                event.needNotify
+                                    ? Icons.notifications_active
+                                    : Icons.notifications_off,
+                                color: Colors.purple,
+                                size: 20,
+                              ),
+                            );
+                          }),
                           const SizedBox(width: 5),
-                          Text("June 5 2025 - 04:00 PM",
+                          Text(format.format(event.dateTime),
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey[400],
@@ -138,10 +149,10 @@ class EventWidget extends StatelessWidget {
                               thickness: 2,
                             )),
                       ),
-                      const Column(
+                       Column(
                         children: [
-                          Text("3",
-                              style: TextStyle(
+                          Text("${ event.dateTime.day- DateTime.now().day}",
+                              style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 25)),

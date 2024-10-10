@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 class NotificationProvider extends ChangeNotifier {
   List<DateTime> notifications = [];
-  bool wantNotify = true;
 
   addNotification(DateTime notification) {
     notifications.add(notification);
@@ -13,5 +12,14 @@ class NotificationProvider extends ChangeNotifier {
     notifications.remove(notification);
     notifyListeners();
   }
+
+  bool wantNotifyToggle(bool eventWantNotify) {
+    return !eventWantNotify;
+  }
+
+  setWantNotify() {
+    notifyListeners();
+  }
+
 
 }

@@ -1,27 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:slide_countdown/slide_countdown.dart';
 
-class EventDetailsScreen extends StatefulWidget {
-  EventDetailsScreen({super.key});
+import '../models/event.dart';
+import '../widgets/NotificationWidget.dart';
 
-  @override
-  State<EventDetailsScreen> createState() => _EventDetailsScreenState();
-}
+class EventDetailsScreen extends StatelessWidget {
+  late Event event;
+  EventDetailsScreen({super.key, required this.event});
 
-class _EventDetailsScreenState extends State<EventDetailsScreen> {
+  DateFormat format = DateFormat('MMM d, y - hh:mm a');
+
   double timerSize = 35;
   FontWeight timerWeight = FontWeight.w900;
   Color timerColor = Colors.purple;
 
   final dateTimeNow = DateTime.now();
-
-  Color c = Colors.purple;
-
-  List<String> notifications = [
-    "Before 1 week",
-    "Before 1 month",
-    "Before 2 week"
-  ];
 
   bool wantNotify = true;
 
@@ -29,9 +23,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Event Details",
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Event Details",
+            style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
+        backgroundColor: Colors.purple, // Set AppBar color to purple
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -39,18 +34,27 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //title and date
+              // Title and date container
               Container(
                 decoration: BoxDecoration(
-                    color: Colors.grey[700],
-                    borderRadius: BorderRadius.circular(20)),
+                
+                gradient: LinearGradient(
+                      colors: [Colors.blueGrey[700]!, Colors.blueGrey[400]!]),
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.grey,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                ]),
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Basmola's Birthday",
-                          style: TextStyle(
+                      Text(event.title,
+                          style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 25)),
@@ -58,13 +62,13 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("June 5 2025 - 04:00 PM",
+                          Text(format.format(event.dateTime),
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey[400],
                                   fontSize: 15)),
                           const Icon(Icons.edit_rounded,
-                              size: 20, color: Colors.purple),
+                              size: 20, color: Colors.white),
                         ],
                       ),
                     ],
@@ -72,30 +76,43 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 ),
               ),
 
-              SizedBox(height: 5),
+              const SizedBox(height: 20),
 
-              //countdown
+              // Countdown container
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Container(
                   decoration: BoxDecoration(
-                      color: Colors.grey[700],
-                      borderRadius: BorderRadius.circular(20)),
+                    gradient: LinearGradient(
+                      colors: [Colors.purple.shade300, Colors.blueGrey.shade700],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: const [
+                    BoxShadow(
+                      color: Colors.grey,
+                      blurRadius: 10,
+                      offset: Offset(0, 3),
+                    ),
+                    ]
+                  ),
                   child: RawSlideCountdown(
                       streamDuration: StreamDuration(
                         config: StreamDurationConfig(
                           countDownConfig: CountDownConfig(
                               duration: Duration(
-                                  days: 28 - dateTimeNow.day,
-                                  hours: 2,
-                                  minutes: 30)),
+                                  days: event.dateTime.day - dateTimeNow.day,
+                                  hours: event.dateTime.hour  - dateTimeNow.hour,
+                                  minutes: event.dateTime.minute  - dateTimeNow.minute,
+                                  )),
                         ),
                       ),
                       builder: (context, duration, countUp) {
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            //day
+                            // Day
                             _buildTimer(
                                 first: RawDigitItem(
                                   duration: duration,
@@ -119,7 +136,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 ),
                                 title: 'Days'),
 
-                            //hours
+                            // Hours
                             _buildTimer(
                                 first: RawDigitItem(
                                   duration: duration,
@@ -143,7 +160,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 ),
                                 title: 'Hours'),
 
-                            //min
+                            // Minutes
                             _buildTimer(
                                 first: RawDigitItem(
                                   duration: duration,
@@ -167,7 +184,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 ),
                                 title: 'Minutes'),
 
-                            //seconds
+                            // Seconds
                             _buildTimer(
                                 first: RawDigitItem(
                                   duration: duration,
@@ -196,7 +213,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 ),
               ),
 
-              //description
+              // Description
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
@@ -213,92 +230,39 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Container(
-                        color: Colors.red,
-                        width: 500,
-                        height: 200,
-                        child: Text("kmooiweoined"),
+                        decoration: BoxDecoration(
+                          color: Colors.blueGrey[700], // Grey-blue background
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              event.details.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        "No Details",
+                                        style: TextStyle(color: Colors.grey[400]),
+                                      ),
+                                    )
+                                  : Text(
+                                      event.details,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                            ],
+                          ),
+                        ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
 
-              //notification
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //notification and icon
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text("Set Notification",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold)),
-                          Switch(
-                              value: (wantNotify),
-                              onChanged: (value) {
-                                setState(() {
-                                  wantNotify = value;
-                                });
-                              },
-                              activeColor: c,
-                              thumbIcon:
-                                  MaterialStateProperty.resolveWith<Icon?>(
-                                      (Set<MaterialState> states) {
-                                if (states.contains(MaterialState.selected)) {
-                                  return const Icon(Icons.notifications_active);
-                                }
-                                return null;
-                              }))
-                        ],
-                      ),
-                    ),
-
-                    //notifyList
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: notifications.length,
-                          itemBuilder: (context, index) {
-                            return _buildNotification(notifications[index]);
-                          }),
-                    ),
-
-                    //add Notification Button
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(
-                          child: TextButton(
-                        onPressed: () {},
-                        style: ButtonStyle(
-                            shape: MaterialStateProperty.all(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15))),
-                            backgroundColor:
-                                MaterialStateProperty.all(Colors.purple)),
-                        child: const Padding(
-                          padding: EdgeInsets.all(5.0),
-                          child: Text(
-                            "Add Notification",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                fontSize: 15),
-                          ),
-                        ),
-                      )),
-                    )
-                  ],
-                ),
-              )
+              // Notification
+              NotificationWidget(event: event,)
             ],
           ),
         ),
