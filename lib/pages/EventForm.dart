@@ -78,10 +78,6 @@ class _EventFormState extends State<EventForm> {
                                       listen: false)
                                   .endDateTime;
                             }
-                            event.notifications =
-                                Provider.of<NotificationProvider>(context,
-                                        listen: false)
-                                    .notifications;
 
                             if (Provider.of<DateTimeProvider>(context,
                                         listen: false)
@@ -93,11 +89,32 @@ class _EventFormState extends State<EventForm> {
                                         listen: false)
                                     .addEvent(event);
 
+                                //add the notifications
+                                List<DateTime> notifications =
+                                    Provider.of<NotificationProvider>(context,
+                                            listen: false)
+                                        .notifications;
+
+                                int eventIdx = Provider.of<EventProvider>(
+                                            context,
+                                            listen: false)
+                                        .events
+                                        .length -
+                                    1;
+
+                                Provider.of<EventProvider>(context,
+                                        listen: false)
+                                    .setNotifications(
+                                        eventIdx: eventIdx,
+                                        notifications: notifications);
+
                                 Provider.of<NotificationProvider>(context,
                                         listen: false)
-                                    .notifications = [];
+                                    .resetNotifications();
 
-                                    Provider.of<DateTimeProvider>(context,
+                                ///
+
+                                Provider.of<DateTimeProvider>(context,
                                         listen: false)
                                     .restartDate();
 
@@ -108,6 +125,10 @@ class _EventFormState extends State<EventForm> {
                               }
                             } else {
                               Navigator.pop(context);
+
+                              Provider.of<NotificationProvider>(context,
+                                      listen: false)
+                                  .resetNotifications();
 
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(const SnackBar(

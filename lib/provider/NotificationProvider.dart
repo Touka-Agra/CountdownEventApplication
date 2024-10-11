@@ -17,9 +17,16 @@ class NotificationProvider extends ChangeNotifier {
     return !eventWantNotify;
   }
 
+  setNotifications(List<DateTime> eventNotifications) {
+    notifications = eventNotifications;
+
+  }
+
+  resetNotifications() {
+    notifications.clear();
+  }
+
   setWantNotify() {
     notifyListeners();
   }
-
-
 }

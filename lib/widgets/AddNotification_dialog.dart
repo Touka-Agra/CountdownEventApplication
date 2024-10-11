@@ -175,9 +175,9 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
                       .addNotification(notificationDate);
                 },
                 style: ButtonStyle(
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
-                    backgroundColor: MaterialStateProperty.all(Colors.purple)),
+                    backgroundColor: WidgetStateProperty.all(Colors.purple)),
                 icon: const Icon(
                   Icons.check_circle,
                   color: Colors.white,

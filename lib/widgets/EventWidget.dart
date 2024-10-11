@@ -8,14 +8,16 @@ import '../pages/EventDetailsScreen.dart';
 import '../provider/EventProvider.dart';
 
 class EventWidget extends StatelessWidget {
-  final Event event;
+  final int eventIdx;
 
-  EventWidget({super.key, required this.event});
+  EventWidget({super.key, required this.eventIdx});
 
   DateFormat format = DateFormat('MMM d, y - hh:mm a');
 
   @override
   Widget build(BuildContext context) {
+    Event event =
+        Provider.of<EventProvider>(context, listen: false).events[eventIdx];
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Consumer<EventProvider>(builder: (context, eventProvider, child) {
@@ -60,10 +62,14 @@ class EventWidget extends StatelessWidget {
           },
           child: GestureDetector(
             onTap: () {
+              print(
+                  "${Provider.of<EventProvider>(context, listen: false).getNotifications(eventIdx: eventIdx)}");
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => EventDetailsScreen(event: event,)));
+                      builder: (context) => EventDetailsScreen(
+                            eventIdx: eventIdx,
+                          )));
             },
             child: Container(
               padding: const EdgeInsets.all(15),
@@ -108,8 +114,8 @@ class EventWidget extends StatelessWidget {
                               },
                               style: ButtonStyle(
                                 backgroundColor:
-                                    MaterialStateProperty.all(Colors.white24),
-                                shape: MaterialStateProperty.all(
+                                    WidgetStateProperty.all(Colors.white24),
+                                shape: WidgetStateProperty.all(
                                     const CircleBorder()),
                               ),
                               icon: Icon(
@@ -149,14 +155,15 @@ class EventWidget extends StatelessWidget {
                               thickness: 2,
                             )),
                       ),
-                       Column(
+                      Column(
                         children: [
-                          Text("${ event.dateTime.day- DateTime.now().day}",
+                          Text(
+                              "${(event.dateTime.difference(DateTime.now())).inDays}",
                               style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 25)),
-                          Text("days left",
+                          const Text("days left",
                               style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,

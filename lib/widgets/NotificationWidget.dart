@@ -1,3 +1,4 @@
+import 'package:countdown_event/provider/EventProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -8,8 +9,8 @@ import '../provider/NotificationProvider.dart';
 import 'AddNotification_dialog.dart';
 
 class NotificationWidget extends StatefulWidget {
-  Event? event;
-  NotificationWidget({super.key, this.event});
+  int? eventIdx;
+  NotificationWidget({super.key, this.eventIdx});
 
   @override
   State<NotificationWidget> createState() => _NotificationWidgetState();
@@ -20,10 +21,6 @@ class _NotificationWidgetState extends State<NotificationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.event != null) {
-      Provider.of<NotificationProvider>(context, listen: false).notifications =
-          widget.event!.notifications;
-    }
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Opacity(
@@ -68,6 +65,13 @@ class _NotificationWidgetState extends State<NotificationWidget> {
                 ignoring: !wantNotify,
                 child: Consumer<NotificationProvider>(
                     builder: (context, notificationProvider, child) {
+                  if (widget.eventIdx != null) {
+                    List<DateTime> eventNotifications =
+                        Provider.of<EventProvider>(context, listen: false)
+                            .getNotifications(eventIdx: widget.eventIdx!);
+                    notificationProvider.setNotifications(eventNotifications);
+                  }
+
                   return ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -90,7 +94,9 @@ class _NotificationWidgetState extends State<NotificationWidget> {
                   onPressed: () {
                     showDialog(
                         context: context,
-                        builder: (context) => AddNotificationDialog(eventDate: Provider.of<DateTimeProvider>(context , listen:false).dateTime,));
+                        builder: (context) => AddNotificationDialog(
+                              eventDate: widget.eventIdx!=null?Provider.of<EventProvider>(context, listen: false).events[widget.eventIdx!].dateTime:Provider.of<DateTimeProvider>(context, listen: false).dateTime
+                            ));
                   },
                   style: ButtonStyle(
                       shape: WidgetStateProperty.all(RoundedRectangleBorder(
@@ -117,9 +123,7 @@ class _NotificationWidgetState extends State<NotificationWidget> {
 }
 
 Widget _buildNotification(DateTime notificationDate) {
-
-
-    DateFormat format = DateFormat('MMM d, y - hh:mm a');
+  DateFormat format = DateFormat('MMM d, y - hh:mm a');
 
   return Consumer<NotificationProvider>(
       builder: (context, notificationProvider, child) {

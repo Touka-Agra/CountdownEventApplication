@@ -59,7 +59,7 @@ class _EventScreenState extends State<EventScreen>
               return ListView.builder(
                 itemCount: eventProvider.events.length,
                 itemBuilder: (context, index) {
-                  return EventWidget(event: eventProvider.events[index]);
+                  return EventWidget(eventIdx: index);
                 },
               );
             }),

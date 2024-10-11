@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:slide_countdown/slide_countdown.dart';
 
 import '../models/event.dart';
+import '../provider/EventProvider.dart';
+import '../provider/NotificationProvider.dart';
 import '../widgets/NotificationWidget.dart';
 
 class EventDetailsScreen extends StatelessWidget {
-  late Event event;
-  EventDetailsScreen({super.key, required this.event});
+  int eventIdx;
+  EventDetailsScreen({super.key, required this.eventIdx});
 
   DateFormat format = DateFormat('MMM d, y - hh:mm a');
 
-  double timerSize = 35;
+  //double timerSize = 35;
   FontWeight timerWeight = FontWeight.w900;
   Color timerColor = Colors.purple;
 
@@ -21,6 +24,45 @@ class EventDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Event event =
+        Provider.of<EventProvider>(context, listen: false).events[eventIdx];
+
+    double _getTimerSize() {
+      int remainingDays = event.dateTime.difference(dateTimeNow).inDays;
+      int numberOfDigits = remainingDays.toString().length;
+
+      print(numberOfDigits);
+
+      return (MediaQuery.of(context).size.width / (numberOfDigits + 8)) - 1;
+    }
+
+    Widget _buildTimer({required String value, required String title}) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 5),
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.white54,
+                  borderRadius: BorderRadius.circular(10)),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Text(
+                  value,
+                  style: TextStyle(
+                      fontWeight: timerWeight,
+                      color: timerColor,
+                      fontSize: _getTimerSize()),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildTitle(title),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Event Details",
@@ -37,17 +79,18 @@ class EventDetailsScreen extends StatelessWidget {
               // Title and date container
               Container(
                 decoration: BoxDecoration(
-                
-                gradient: LinearGradient(
-                      colors: [Colors.blueGrey[700]!, Colors.blueGrey[400]!]),
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.grey,
-                      blurRadius: 5,
-                      offset: Offset(0, 3),
-                    ),
-                ]),
+                    gradient: LinearGradient(colors: [
+                      Colors.blueGrey[700]!,
+                      Colors.blueGrey[400]!
+                    ]),
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.grey,
+                        blurRadius: 5,
+                        offset: Offset(0, 3),
+                      ),
+                    ]),
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Column(
@@ -75,144 +118,99 @@ class EventDetailsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
+    
               const SizedBox(height: 20),
-
+    
               // Countdown container
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.purple.shade300, Colors.blueGrey.shade700],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: const [
-                    BoxShadow(
-                      color: Colors.grey,
-                      blurRadius: 10,
-                      offset: Offset(0, 3),
-                    ),
-                    ]
-                  ),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.purple.shade300,
+                          Colors.blueGrey.shade700
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.grey,
+                          blurRadius: 10,
+                          offset: Offset(0, 3),
+                        ),
+                      ]),
                   child: RawSlideCountdown(
                       streamDuration: StreamDuration(
                         config: StreamDurationConfig(
                           countDownConfig: CountDownConfig(
-                              duration: Duration(
-                                  days: event.dateTime.day - dateTimeNow.day,
-                                  hours: event.dateTime.hour  - dateTimeNow.hour,
-                                  minutes: event.dateTime.minute  - dateTimeNow.minute,
-                                  )),
+                              duration: (event.dateTime.isAfter(dateTimeNow))
+                                  ? Duration(
+                                      days: event.dateTime
+                                          .difference(dateTimeNow)
+                                          .inDays,
+                                      hours: event.dateTime.hour -
+                                          dateTimeNow.hour,
+                                      minutes: event.dateTime.minute -
+                                          dateTimeNow.minute,
+                                      seconds: event.dateTime.second -
+                                          dateTimeNow.second)
+                                  : Duration.zero),
                         ),
                       ),
                       builder: (context, duration, countUp) {
+                        if (event.dateTime.isBefore(DateTime.now())) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildTimer(value: '0', title: 'Days'),
+                              _buildTimer(value: '00'.padLeft(2, '0'), title: 'Hours'),
+                              _buildTimer(value: '00'.padLeft(2, '0'), title: 'Minutes'),
+                              _buildTimer(value: '00'.padLeft(2, '0'), title: 'Seconds'),
+                            ],
+                          );
+                        }
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             // Day
                             _buildTimer(
-                                first: RawDigitItem(
-                                  duration: duration,
-                                  timeUnit: TimeUnit.days,
-                                  digitType: DigitType.first,
-                                  countUp: countUp,
-                                  style: TextStyle(
-                                      fontSize: timerSize,
-                                      fontWeight: timerWeight,
-                                      color: timerColor),
-                                ),
-                                second: RawDigitItem(
-                                  duration: duration,
-                                  timeUnit: TimeUnit.days,
-                                  digitType: DigitType.second,
-                                  countUp: countUp,
-                                  style: TextStyle(
-                                      fontSize: timerSize,
-                                      fontWeight: timerWeight,
-                                      color: timerColor),
-                                ),
-                                title: 'Days'),
-
+                              value: duration.inDays
+                                  .toString(), 
+                              title: 'Days',
+                            ),
+    
                             // Hours
                             _buildTimer(
-                                first: RawDigitItem(
-                                  duration: duration,
-                                  timeUnit: TimeUnit.hours,
-                                  digitType: DigitType.first,
-                                  countUp: countUp,
-                                  style: TextStyle(
-                                      fontSize: timerSize,
-                                      fontWeight: timerWeight,
-                                      color: timerColor),
-                                ),
-                                second: RawDigitItem(
-                                  duration: duration,
-                                  timeUnit: TimeUnit.hours,
-                                  digitType: DigitType.second,
-                                  countUp: countUp,
-                                  style: TextStyle(
-                                      fontSize: timerSize,
-                                      fontWeight: timerWeight,
-                                      color: timerColor),
-                                ),
-                                title: 'Hours'),
-
+                              value: (duration.inHours % 24)
+                                  .toString()
+                                  .padLeft(2, '0'),
+                              title: 'Hours',
+                            ),
+    
                             // Minutes
                             _buildTimer(
-                                first: RawDigitItem(
-                                  duration: duration,
-                                  timeUnit: TimeUnit.minutes,
-                                  digitType: DigitType.first,
-                                  countUp: countUp,
-                                  style: TextStyle(
-                                      fontSize: timerSize,
-                                      fontWeight: timerWeight,
-                                      color: timerColor),
-                                ),
-                                second: RawDigitItem(
-                                  duration: duration,
-                                  timeUnit: TimeUnit.minutes,
-                                  digitType: DigitType.second,
-                                  countUp: countUp,
-                                  style: TextStyle(
-                                      fontSize: timerSize,
-                                      fontWeight: timerWeight,
-                                      color: timerColor),
-                                ),
-                                title: 'Minutes'),
-
+                              value: (duration.inMinutes % 60)
+                                  .toString()
+                                  .padLeft(2, '0'),
+                              title: 'Minutes',
+                            ),
+    
                             // Seconds
                             _buildTimer(
-                                first: RawDigitItem(
-                                  duration: duration,
-                                  timeUnit: TimeUnit.seconds,
-                                  digitType: DigitType.first,
-                                  countUp: countUp,
-                                  style: TextStyle(
-                                      fontSize: timerSize,
-                                      fontWeight: timerWeight,
-                                      color: timerColor),
-                                ),
-                                second: RawDigitItem(
-                                  duration: duration,
-                                  timeUnit: TimeUnit.seconds,
-                                  digitType: DigitType.second,
-                                  countUp: countUp,
-                                  style: TextStyle(
-                                      fontSize: timerSize,
-                                      fontWeight: timerWeight,
-                                      color: timerColor),
-                                ),
-                                title: 'Seconds'),
+                              value: (duration.inSeconds % 60)
+                                  .toString()
+                                  .padLeft(2, '0'),
+                              title: 'Seconds',
+                            ),
                           ],
                         );
                       }),
                 ),
               ),
-
+    
               // Description
               Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -243,7 +241,8 @@ class EventDetailsScreen extends StatelessWidget {
                                   ? Center(
                                       child: Text(
                                         "No Details",
-                                        style: TextStyle(color: Colors.grey[400]),
+                                        style: TextStyle(
+                                            color: Colors.grey[400]),
                                       ),
                                     )
                                   : Text(
@@ -260,9 +259,11 @@ class EventDetailsScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
+    
               // Notification
-              NotificationWidget(event: event,)
+              NotificationWidget(
+                eventIdx: eventIdx,
+              )
             ],
           ),
         ),
@@ -277,56 +278,4 @@ Widget _buildTitle(String title) {
     style: TextStyle(
         fontWeight: FontWeight.bold, color: Colors.grey[400], fontSize: 10),
   ));
-}
-
-Widget _buildTimer(
-    {required Widget first, required Widget second, required String title}) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 5),
-    child: Column(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-              color: Colors.white54, borderRadius: BorderRadius.circular(10)),
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              children: [first, second],
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        _buildTitle(title),
-      ],
-    ),
-  );
-}
-
-Widget _buildNotification(String time) {
-  return Padding(
-    padding: const EdgeInsets.all(5.0),
-    child: Container(
-      decoration: BoxDecoration(
-        color: Colors.blueGrey,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Text(
-            time,
-            style: const TextStyle(color: Colors.white),
-          ),
-        ),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(
-            Icons.cancel,
-            color: Colors.white,
-            size: 25,
-          ),
-        ),
-      ]),
-    ),
-  );
 }
