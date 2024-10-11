@@ -108,7 +108,7 @@ class _NotesViewBodyState extends State<NotesViewBody>
               ListTile(
                 title: Text(
                   selectedDateTime != null
-                      ? DateFormat('yyyy-MM-dd – HH:mm')
+                      ? DateFormat('MMM d, y - hh:mm a')
                           .format(selectedDateTime!)
                       : 'Select Date & Time',
                   style: const TextStyle(color: Colors.white),
@@ -172,167 +172,257 @@ class _NotesViewBodyState extends State<NotesViewBody>
         controller: _tabController,
         children: [
           // Active Tasks Tab
-          ListView.builder(
-            itemCount: notesProvider.activeNotes.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onDoubleTap: () => _editNoteAt(context, index),
-                child: Dismissible(
-                  key: Key(notesProvider.activeNotes[index]['title']),
-                  onDismissed: (direction) {
-                    notesProvider.deleteNoteAt(index);
-                    // Optionally show a snackbar or some confirmation here
-                  },
-                  child: Container(
-                    margin:
-                        const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 123, 176, 180),
-                      borderRadius: BorderRadius.circular(8),
-                      border:
-                          Border.all(color: Color.fromARGB(255, 123, 176, 180)),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 4,
-                          offset: Offset(2, 2),
-                        ),
-                      ],
-                    ),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        radius: 25, // Reduced radius for a smaller avatar
-                        backgroundColor: Color.fromARGB(255, 123, 147, 180),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView.builder(
+              itemCount: notesProvider.activeNotes.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onDoubleTap: () => _editNoteAt(context, index),
+                  child: Dismissible(
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          gradient: LinearGradient(
+                            colors: [Colors.redAccent, Colors.red[800]!],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                                color: Colors.amber,
+                                blurRadius: 10,
+                                offset: Offset(0, 3)),
+                          ]),
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
+                            Icon(Icons.delete, color: Colors.white, size: 28),
+                            SizedBox(width: 8),
                             Text(
-                              DateFormat('HH:mm').format(
-                                  notesProvider.activeNotes[index]['time']),
-                              style: const TextStyle(
+                              "Delete",
+                              style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 10, // Reduced font size for time
-                              ),
-                            ),
-                            Text(
-                              DateFormat('yyyy-MM-dd').format(
-                                  notesProvider.activeNotes[index]['time']),
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 8, // Reduced font size for date
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      title: Text(
-                        notesProvider.activeNotes[index]['title'],
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      subtitle: Text(
-                        notesProvider.activeNotes[index]['subtitle'],
-                        style: const TextStyle(color: Colors.white70),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(
-                          Icons.check,
-                          color: Color.fromARGB(255, 249, 250, 249),
+                    ),
+                    key: Key(notesProvider.activeNotes[index]['title']),
+                    onDismissed: (direction) {
+                      notesProvider.deleteNoteAt(index);
+                      // Optionally show a snackbar or some confirmation here
+                    },
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 30, // Reduced radius for a smaller avatar
+                          backgroundColor: Color.fromARGB(255, 123, 147, 180),
+                          child: Text(
+                            DateFormat('hh:mm a').format(
+                                notesProvider.activeNotes[index]['time']),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10, // Reduced font size for time
+                            ),
+                          ),
                         ),
-                        onPressed: () {
-                          notesProvider.toggleCompletion(index);
-                        },
-                      ),
+                        Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: Color.fromARGB(255, 123, 176, 180),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                  color: Color.fromARGB(255, 123, 176, 180)),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 4,
+                                  offset: Offset(2, 2),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 8.0, right: 12),
+                                  child: Text(
+                                    DateFormat('MMM d, y').format(notesProvider
+                                        .activeNotes[index]['time']),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                        shadows: [
+                                          Shadow(
+                                              color: Colors.white54,
+                                              offset: Offset(0.5, 0.5))
+                                        ]
+                                        //fontSize: 8,
+                                        ),
+                                  ),
+                                ),
+                                ListTile(
+                                  title: Text(
+                                    notesProvider.activeNotes[index]['title'],
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        shadows: [
+                                          Shadow(
+                                              color: Colors.white54,
+                                              offset: Offset(0.5, 0.5))
+                                        ]),
+                                  ),
+                                  subtitle: Text(
+                                    notesProvider.activeNotes[index]
+                                        ['subtitle'],
+                                    style:
+                                        const TextStyle(color: Colors.white70),
+                                  ),
+                                  trailing: IconButton(
+                                    icon: const Icon(
+                                      Icons.check,
+                                      color: Color.fromARGB(255, 249, 250, 249),
+                                    ),
+                                    onPressed: () {
+                                      notesProvider.toggleCompletion(index);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
 
           // History Tab
-          ListView.builder(
-            itemCount: notesProvider.historyNotes.length,
-            itemBuilder: (context, index) {
-              return Container(
-                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 180, 180, 180),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Color.fromARGB(255, 180, 180, 180)),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4,
-                      offset: Offset(2, 2),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView.builder(
+              itemCount: notesProvider.historyNotes.length,
+              itemBuilder: (context, index) {
+                return Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 30, // Reduced radius for a smaller avatar
+                      backgroundColor: Color.fromARGB(255, 123, 147, 180),
+                      child: Text(
+                        DateFormat('hh:mm a').format(
+                            notesProvider.historyNotes[index]['time']),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10, // Reduced font size for time
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 180, 180, 180),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Color.fromARGB(255, 180, 180, 180)),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 4,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 8.0, right: 12),
+                                  child: Text(
+                                    DateFormat('MMM d, y').format(notesProvider
+                                        .activeNotes[index]['time']),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                        shadows: [
+                                          Shadow(
+                                              color: Colors.white54,
+                                              offset: Offset(0.5, 0.5))
+                                        ]
+                                        //fontSize: 8,
+                                        ),
+                                  ),
+                                ),
+                            ListTile(
+                              title: Text(
+                                notesProvider.historyNotes[index]['title'],
+                                style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        shadows: [
+                                          Shadow(
+                                              color: Colors.white54,
+                                              offset: Offset(0.5, 0.5))
+                                        ])
+                              ),
+                              subtitle: RichText(
+                                text: TextSpan(
+                                  style: const TextStyle(color: Colors.white70),
+                                  children: [
+                                    TextSpan(
+                                      text: notesProvider.historyNotes[index]['subtitle']
+                                          .split(RegExp(r"   (Not yet|Done)"))[0],
+                                    ),
+                                    if (notesProvider.historyNotes[index]['subtitle']
+                                        .contains("Not yet"))
+                                      const TextSpan(
+                                        text: "   Not yet",
+                                        style:  TextStyle(
+                                            color: Colors.red), // Color for "Not yet"
+                                      )
+                                    else if (notesProvider.historyNotes[index]['subtitle']
+                                        .contains("Done"))
+                                      TextSpan(
+                                        text: "   Done",
+                                        style: const TextStyle(
+                                            color: Color.fromARGB(
+                                                255, 2, 248, 10)), // Color for "Done"
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(
+                                  Icons.restore,
+                                  color: Color.fromARGB(255, 249, 250, 249),
+                                ),
+                                onPressed: () => notesProvider.restoreNoteAt(index),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
-                ),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    radius: 25, // Reduced radius for a smaller avatar
-                    backgroundColor: Color.fromARGB(255, 123, 147, 180),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          DateFormat('HH:mm').format(
-                              notesProvider.historyNotes[index]['time']),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10, // Reduced font size for time
-                          ),
-                        ),
-                        Text(
-                          DateFormat('yyyy-MM-dd').format(
-                              notesProvider.historyNotes[index]['time']),
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 8, // Reduced font size for date
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  title: Text(
-                    notesProvider.historyNotes[index]['title'],
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  subtitle: RichText(
-                    text: TextSpan(
-                      style: const TextStyle(color: Colors.white70),
-                      children: [
-                        TextSpan(
-                          text: notesProvider.historyNotes[index]['subtitle']
-                              .split(RegExp(r"   (Not yet|Done)"))[0],
-                        ),
-                        if (notesProvider.historyNotes[index]['subtitle']
-                            .contains("Not yet"))
-                          TextSpan(
-                            text: "   Not yet",
-                            style: const TextStyle(
-                                color: Colors.red), // Color for "Not yet"
-                          )
-                        else if (notesProvider.historyNotes[index]['subtitle']
-                            .contains("Done"))
-                          TextSpan(
-                            text: "   Done",
-                            style: const TextStyle(
-                                color: Color.fromARGB(
-                                    255, 2, 248, 10)), // Color for "Done"
-                          ),
-                      ],
-                    ),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(
-                      Icons.restore,
-                      color: Color.fromARGB(255, 249, 250, 249),
-                    ),
-                    onPressed: () => notesProvider.restoreNoteAt(index),
-                  ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           )
         ],
       ),
