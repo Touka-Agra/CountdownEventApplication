@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/event.dart';
 import '../provider/DateTimeProvider.dart';
 import '../provider/EventProvider.dart';
-import '../provider/NotificationProvider.dart';
 import '../widgets/DateTimeSetterWidget.dart';
 import '../widgets/NotificationWidget.dart';
 
@@ -64,13 +63,14 @@ class _EventFormState extends State<EventForm> {
                         child: IconButton(
                           onPressed: () {
                             Event event = Event(
-                                title: _titleController.text,
-                                details: _descriptionController.text,
-                                dateTime: Provider.of<DateTimeProvider>(context,
-                                        listen: false)
-                                    .dateTime,
-                                needEndDate: needEndDate,
-                                needNotify: true);
+                              title: _titleController.text,
+                              details: _descriptionController.text,
+                              dateTime: Provider.of<DateTimeProvider>(context,
+                                      listen: false)
+                                  .dateTime,
+                              needEndDate: needEndDate,
+                              needNotify: true,
+                            );
 
                             if (needEndDate) {
                               event.endDateTime = Provider.of<DateTimeProvider>(
@@ -90,10 +90,6 @@ class _EventFormState extends State<EventForm> {
                                     .addEvent(event);
 
                                 //add the notifications
-                                List<DateTime> notifications =
-                                    Provider.of<NotificationProvider>(context,
-                                            listen: false)
-                                        .notifications;
 
                                 int eventIdx = Provider.of<EventProvider>(
                                             context,
@@ -102,17 +98,88 @@ class _EventFormState extends State<EventForm> {
                                         .length -
                                     1;
 
-                                Provider.of<EventProvider>(context,
-                                        listen: false)
-                                    .setNotifications(
-                                        eventIdx: eventIdx,
-                                        notifications: notifications);
-
-                                Provider.of<NotificationProvider>(context,
-                                        listen: false)
-                                    .resetNotifications();
-
-                                ///
+                                showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (context) => Container(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.35,
+                                          decoration: const BoxDecoration(
+                                              color: Colors.black,
+                                              borderRadius:
+                                                  BorderRadius.vertical(
+                                                      top: Radius.circular(
+                                                          25.0)),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.purple,
+                                                    spreadRadius: 2,
+                                                    blurRadius: 5)
+                                              ]),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    const Spacer(),
+                                                    const Text(
+                                                      "Customize Notifications",
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w800,
+                                                          fontSize: 18),
+                                                    ),
+                                                    
+                                                    Expanded(
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                                right: 5.0,
+                                                                top: 8.0),
+                                                        child: Align(
+                                                          alignment:
+                                                              Alignment.topRight,
+                                                          child: IconButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                            style: ButtonStyle(
+                                                                shape: WidgetStateProperty.all(
+                                                                    RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(
+                                                                                20))),
+                                                                backgroundColor:
+                                                                    WidgetStateProperty
+                                                                        .all(Colors
+                                                                            .purple)),
+                                                            icon: const Icon(
+                                                              Icons.check_circle,
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Expanded(
+                                                  child: SingleChildScrollView(
+                                                    child: NotificationWidget(
+                                                      eventIdx: eventIdx,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ));
 
                                 Provider.of<DateTimeProvider>(context,
                                         listen: false)
@@ -126,10 +193,6 @@ class _EventFormState extends State<EventForm> {
                             } else {
                               Navigator.pop(context);
 
-                              Provider.of<NotificationProvider>(context,
-                                      listen: false)
-                                  .resetNotifications();
-
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(const SnackBar(
                                 content:
@@ -138,11 +201,11 @@ class _EventFormState extends State<EventForm> {
                             }
                           },
                           style: ButtonStyle(
-                              shape: MaterialStateProperty.all(
+                              shape: WidgetStateProperty.all(
                                   RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20))),
                               backgroundColor:
-                                  MaterialStateProperty.all(Colors.purple)),
+                                  WidgetStateProperty.all(Colors.purple)),
                           icon: const Icon(
                             Icons.check_circle,
                             color: Colors.white,
@@ -173,10 +236,6 @@ class _EventFormState extends State<EventForm> {
                               validator: (value) {
                                 if (value!.isEmpty) {
                                   return "This field can't be Empty!";
-                                } else if (!Provider.of<EventProvider>(context,
-                                        listen: false)
-                                    .checkTitle(value)) {
-                                  return "Title must be Unique!";
                                 }
                               },
                               maxLength: 32,
@@ -268,9 +327,6 @@ class _EventFormState extends State<EventForm> {
                         ],
                       ),
                     ),
-
-                    //notification
-                    NotificationWidget()
                   ],
                 )),
               ),

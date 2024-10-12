@@ -1,4 +1,3 @@
-import 'package:countdown_event/provider/NotificationProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +21,7 @@ class EventWidget extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Consumer<EventProvider>(builder: (context, eventProvider, child) {
         return Dismissible(
-          key: Key(event.title),
+          key: Key(eventIdx.toString()),
           direction: DismissDirection.endToStart,
           background: Container(
             decoration: BoxDecoration(
@@ -62,8 +61,7 @@ class EventWidget extends StatelessWidget {
           },
           child: GestureDetector(
             onTap: () {
-              print(
-                  "${Provider.of<EventProvider>(context, listen: false).getNotifications(eventIdx: eventIdx)}");
+             
               Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -103,30 +101,24 @@ class EventWidget extends StatelessWidget {
                       const SizedBox(height: 5),
                       Row(
                         children: [
-                          Consumer<NotificationProvider>(
-                              builder: (context, notificationProvider, child) {
-                            return IconButton(
-                              onPressed: () {
-                                event.needNotify = notificationProvider
-                                    .wantNotifyToggle(event.needNotify);
-
-                                notificationProvider.setWantNotify();
-                              },
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    WidgetStateProperty.all(Colors.white24),
-                                shape: WidgetStateProperty.all(
-                                    const CircleBorder()),
-                              ),
-                              icon: Icon(
-                                event.needNotify
-                                    ? Icons.notifications_active
-                                    : Icons.notifications_off,
-                                color: Colors.purple,
-                                size: 20,
-                              ),
-                            );
-                          }),
+                          IconButton(
+                            onPressed: () {
+                             
+                            },
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  WidgetStateProperty.all(Colors.white24),
+                              shape: WidgetStateProperty.all(
+                                  const CircleBorder()),
+                            ),
+                            icon: Icon(
+                              event.needNotify
+                                  ? Icons.notifications_active
+                                  : Icons.notifications_off,
+                              color: Colors.purple,
+                              size: 20,
+                            ),
+                          ),
                           const SizedBox(width: 5),
                           Text(format.format(event.dateTime),
                               style: TextStyle(

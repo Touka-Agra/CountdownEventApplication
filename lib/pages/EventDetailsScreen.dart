@@ -5,7 +5,6 @@ import 'package:slide_countdown/slide_countdown.dart';
 
 import '../models/event.dart';
 import '../provider/EventProvider.dart';
-import '../provider/NotificationProvider.dart';
 import '../widgets/NotificationWidget.dart';
 
 class EventDetailsScreen extends StatelessWidget {
@@ -30,8 +29,6 @@ class EventDetailsScreen extends StatelessWidget {
     double _getTimerSize() {
       int remainingDays = event.dateTime.difference(dateTimeNow).inDays;
       int numberOfDigits = remainingDays.toString().length;
-
-      print(numberOfDigits);
 
       return (MediaQuery.of(context).size.width / (numberOfDigits + 8)) - 1;
     }

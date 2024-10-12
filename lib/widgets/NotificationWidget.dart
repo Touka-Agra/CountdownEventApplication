@@ -5,12 +5,11 @@ import 'package:provider/provider.dart';
 
 import '../models/event.dart';
 import '../provider/DateTimeProvider.dart';
-import '../provider/NotificationProvider.dart';
 import 'AddNotification_dialog.dart';
 
 class NotificationWidget extends StatefulWidget {
-  int? eventIdx;
-  NotificationWidget({super.key, this.eventIdx});
+  int eventIdx;
+  NotificationWidget({super.key, required this.eventIdx});
 
   @override
   State<NotificationWidget> createState() => _NotificationWidgetState();
@@ -63,22 +62,16 @@ class _NotificationWidgetState extends State<NotificationWidget> {
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: IgnorePointer(
                 ignoring: !wantNotify,
-                child: Consumer<NotificationProvider>(
-                    builder: (context, notificationProvider, child) {
-                  if (widget.eventIdx != null) {
-                    List<DateTime> eventNotifications =
-                        Provider.of<EventProvider>(context, listen: false)
-                            .getNotifications(eventIdx: widget.eventIdx!);
-                    notificationProvider.setNotifications(eventNotifications);
-                  }
-
+                child: Consumer<EventProvider>(
+                    builder: (context, eventProvider, child) {
+                  List<DateTime> notifications =
+                      eventProvider.getNotifications(eventIdx: widget.eventIdx);
                   return ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: notificationProvider.notifications.length,
+                      itemCount: notifications.length,
                       itemBuilder: (context, index) {
-                        return _buildNotification(
-                            notificationProvider.notifications[index]);
+                        return _buildNotification(notifications[index], widget.eventIdx);
                       });
                 }),
               ),
@@ -95,8 +88,14 @@ class _NotificationWidgetState extends State<NotificationWidget> {
                     showDialog(
                         context: context,
                         builder: (context) => AddNotificationDialog(
-                              eventDate: widget.eventIdx!=null?Provider.of<EventProvider>(context, listen: false).events[widget.eventIdx!].dateTime:Provider.of<DateTimeProvider>(context, listen: false).dateTime
-                            ));
+                            eventDate: widget.eventIdx != null
+                                ? Provider.of<EventProvider>(context,
+                                        listen: false)
+                                    .events[widget.eventIdx!]
+                                    .dateTime
+                                : Provider.of<DateTimeProvider>(context,
+                                        listen: false)
+                                    .dateTime, eventIdx: widget.eventIdx,));
                   },
                   style: ButtonStyle(
                       shape: WidgetStateProperty.all(RoundedRectangleBorder(
@@ -122,11 +121,11 @@ class _NotificationWidgetState extends State<NotificationWidget> {
   }
 }
 
-Widget _buildNotification(DateTime notificationDate) {
+Widget _buildNotification(DateTime notificationDate, int eventIdx) {
   DateFormat format = DateFormat('MMM d, y - hh:mm a');
 
-  return Consumer<NotificationProvider>(
-      builder: (context, notificationProvider, child) {
+  return Consumer<EventProvider>(
+      builder: (context, eventProvider, child) {
     return Padding(
         padding: const EdgeInsets.all(5.0),
         child: Container(
@@ -145,7 +144,7 @@ Widget _buildNotification(DateTime notificationDate) {
             ),
             IconButton(
               onPressed: () {
-                notificationProvider.removeNotification(notificationDate);
+                eventProvider.removeNotification( eventIdx: eventIdx, notificationDate: notificationDate);
               },
               icon: const Icon(
                 Icons.cancel,

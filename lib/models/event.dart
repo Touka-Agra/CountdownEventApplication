@@ -31,5 +31,6 @@ class Event {
       required this.details,
       required this.dateTime,
       required this.needEndDate,
-      required this.needNotify});
+      required this.needNotify,
+      });
 }

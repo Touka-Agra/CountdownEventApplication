@@ -1,14 +1,15 @@
-import 'package:countdown_event/provider/NotificationProvider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../provider/DateTimeProvider.dart';
+import '../provider/EventProvider.dart';
 
 class AddNotificationDialog extends StatefulWidget {
   late DateTime eventDate;
-  AddNotificationDialog({super.key, required this.eventDate});
+  int eventIdx;
+  AddNotificationDialog({super.key, required this.eventDate, required this.eventIdx});
 
   @override
   State<AddNotificationDialog> createState() => _AddNotificationDialogState();
@@ -171,8 +172,10 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
               child: IconButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  Provider.of<NotificationProvider>(context, listen: false)
-                      .addNotification(notificationDate);
+                  Provider.of<EventProvider>(context, listen: false)
+                      .addNotification(
+                          eventIdx: widget.eventIdx,
+                          notificationDate: notificationDate);
                 },
                 style: ButtonStyle(
                     shape: WidgetStateProperty.all(RoundedRectangleBorder(

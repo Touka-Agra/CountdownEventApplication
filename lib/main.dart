@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:awesome_notifications/awesome_notifications.dart'; // Import the package
 
 import 'Customs/BottomNavBar.dart';
-import 'provider/NotificationProvider.dart';
 import 'provider/event_provider.dart';
 import 'provider/EventProvider.dart';
 import 'provider/DateTimeProvider.dart';
@@ -33,7 +32,6 @@ class CalendarApp extends StatelessWidget {
             ChangeNotifierProvider(create: (_) => EventtProvider()),
             ChangeNotifierProvider(create: (_) => EventProvider()),
             ChangeNotifierProvider(create: (_) => DateTimeProvider()),
-            ChangeNotifierProvider(create: (_) => NotificationProvider()),
             ChangeNotifierProvider(create: (_) => NotesProvider()),
           ],
           child: MaterialApp(

@@ -4,40 +4,41 @@ import '../models/event.dart';
 
 class EventProvider extends ChangeNotifier {
   List<Event> events = [];
-  List<String> eventsTitle = [];
+  List<DateTime> notifications = [];
 
-  bool addEvent(Event newEvent) {
-    bool response = false;
-    if (!eventsTitle.contains(newEvent.title)) {
-      events.add(newEvent);
-      eventsTitle.add(newEvent.title);
-      response = true;
-      notifyListeners();
-    }
-
-    return response;
+  addEvent(Event newEvent) {
+    events.add(newEvent);
+    notifyListeners();
   }
 
   removeEvent(Event event) {
     events.remove(event);
-    eventsTitle.remove((event.title));
     notifyListeners();
   }
 
-  bool checkTitle(String title) {
-    return !eventsTitle.contains(title);
+  setNotifications(
+      {required int eventIdx, required List<DateTime> notifications}) {
+    events[eventIdx].notifications.clear();
+    events[eventIdx].notifications.addAll(notifications);
+
+    notifyListeners();
   }
 
-  setNotifications({required int eventIdx, required List<DateTime> notifications}) {
-  print('Setting notifications for event: $eventIdx');
+  addNotification({required int eventIdx, required DateTime notificationDate}) {
+    events[eventIdx].notifications.add(notificationDate);
+    notifyListeners();
+  }
 
-  // Ensure you're updating the same list in the event object
-  events[eventIdx].notifications.clear();  // Clear the existing list
-  events[eventIdx].notifications.addAll(notifications);  // Add all new notifications
+  removeNotification(
+      {required int eventIdx, required DateTime notificationDate}) {
+    events[eventIdx].notifications.remove(notificationDate);
+    notifyListeners();
+  }
 
-  notifyListeners();
-}
-
+  clearNotification({required int eventIdx}) {
+    events[eventIdx].notifications.clear();
+    notifyListeners();
+  }
 
   List<DateTime> getNotifications({required int eventIdx}) {
     return events[eventIdx].notifications;
