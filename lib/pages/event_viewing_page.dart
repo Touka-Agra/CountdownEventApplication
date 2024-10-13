@@ -23,7 +23,7 @@ class _EventViewingPageState extends State<EventViewingPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -39,7 +39,7 @@ class _EventViewingPageState extends State<EventViewingPage> {
           title: Text(widget.event.title),
           actions: [
             IconButton(
-              icon: Icon(Icons.edit),
+              icon: const Icon(Icons.edit),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => EventEditingPage(event: widget.event),
@@ -47,7 +47,7 @@ class _EventViewingPageState extends State<EventViewingPage> {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.delete),
+              icon: const Icon(Icons.delete),
               onPressed: () {
                 deleteEvent(context);
               },
@@ -59,11 +59,11 @@ class _EventViewingPageState extends State<EventViewingPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 "Event Details",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text("Title: ${widget.event.title}"),
               Text("From: ${widget.event.from}"),
               Text("To: ${widget.event.to}"),
@@ -79,15 +79,15 @@ class _EventViewingPageState extends State<EventViewingPage> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Delete Event"),
-        content: Text("Are you sure you want to delete this event?"),
+        title: const Text("Delete Event"),
+        content: const Text("Are you sure you want to delete this event?"),
         actions: [
           TextButton(
-            child: Text("Cancel"),
+            child: const Text("Cancel"),
             onPressed: () => Navigator.of(context).pop(false),
           ),
           TextButton(
-            child: Text("Delete"),
+            child: const Text("Delete"),
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],
@@ -96,7 +96,7 @@ class _EventViewingPageState extends State<EventViewingPage> {
 
     if (shouldDelete == true && widget.event != null) {
       final provider = Provider.of<EventtProvider>(context, listen: false);
-      provider.deleteEvent(widget.event!);
+      provider.deleteEvent(widget.event);
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => HomePage()));
     }

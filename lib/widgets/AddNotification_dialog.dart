@@ -1,22 +1,30 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../provider/DateTimeProvider.dart';
+import '../models/event.dart';
 import '../provider/EventProvider.dart';
 
 class AddNotificationDialog extends StatefulWidget {
   late DateTime eventDate;
   int eventIdx;
-  AddNotificationDialog({super.key, required this.eventDate, required this.eventIdx});
+  AddNotificationDialog(
+      {super.key, required this.eventDate, required this.eventIdx});
 
   @override
   State<AddNotificationDialog> createState() => _AddNotificationDialogState();
 }
 
 class _AddNotificationDialogState extends State<AddNotificationDialog> {
-  final List<String> _unitList = ["Months", "Weeks", "Days", "Hours"];
+  final List<String> _unitList = [
+    "Months",
+    "Weeks",
+    "Days",
+    "Hours",
+    "Minutes"
+  ];
 
   late DateTime date;
   late DateTime notificationDate;
@@ -47,6 +55,9 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
         break;
       case "Hours":
         timeDiff = date.difference(dateNow).inHours;
+        break;
+      case "Minutes":
+        timeDiff = date.difference(dateNow).inMinutes;
         break;
     }
 
@@ -80,6 +91,9 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
       case "Hours":
         notificationDate = date.subtract(Duration(hours: _selectedTime));
         break;
+      case "Minutes":
+        notificationDate = date.subtract(Duration(minutes: _selectedTime));
+        break;
     }
 
     // Ensure the notification date is not in the past
@@ -95,6 +109,7 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
       "Weeks": _generateTimeList("Weeks"),
       "Days": _generateTimeList("Days"),
       "Hours": _generateTimeList("Hours"),
+      "Minutes": _generateTimeList("Minutes"),
     };
     return Dialog(
       child: Container(
@@ -170,12 +185,26 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: IconButton(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.pop(context);
+
+                  int uniqueId =
+                      DateTime.now().millisecondsSinceEpoch.remainder(100000);
+
                   Provider.of<EventProvider>(context, listen: false)
                       .addNotification(
                           eventIdx: widget.eventIdx,
-                          notificationDate: notificationDate);
+                          notificationDate: notificationDate,
+                          uniqueId: uniqueId);
+
+                  Event event =
+                      Provider.of<EventProvider>(context, listen: false)
+                          .events[widget.eventIdx];
+
+                  _scheduleNotification(
+                      uniqueId: uniqueId,
+                      notificationDate: notificationDate,
+                      event: event);
                 },
                 style: ButtonStyle(
                     shape: WidgetStateProperty.all(RoundedRectangleBorder(
@@ -192,4 +221,42 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
       ),
     );
   }
+}
+
+Future<void> _scheduleNotification(
+    {required DateTime notificationDate,
+    required int uniqueId,
+    required Event event}) async {
+
+       Duration duration = event.dateTime.difference(DateTime.now());
+    
+    late String timeRemaining;
+
+      if (duration.inDays > 0) {
+        timeRemaining = 'in ${duration.inDays} day${duration.inDays > 1 ? 's' : ''}';
+      } else if (duration.inHours > 0) {
+        timeRemaining = 'in ${duration.inHours} hour${duration.inHours > 1 ? 's' : ''}';
+      } else if (duration.inMinutes > 0) {
+        timeRemaining = 'in ${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''}';
+      } else {
+        timeRemaining = 'now';
+      }
+
+  await AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: uniqueId,
+      channelKey: 'countdown_channel',
+      title: 'Reminder for ${event.title}',
+      body: 'Your event "${event.title}" starts $timeRemaining!',
+      notificationLayout: NotificationLayout.Default,
+      wakeUpScreen: true,
+    ),
+    schedule: NotificationCalendar(
+      year: notificationDate.year,
+      month: notificationDate.month,
+      day: notificationDate.day,
+      hour: notificationDate.hour,
+      minute: notificationDate.minute,
+    ),
+  );
 }

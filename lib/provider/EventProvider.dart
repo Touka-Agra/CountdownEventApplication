@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../models/NotificationId.dart';
 import '../models/event.dart';
 
 class EventProvider extends ChangeNotifier {
   List<Event> events = [];
-  List<DateTime> notifications = [];
 
   addEvent(Event newEvent) {
     events.add(newEvent);
@@ -16,32 +16,24 @@ class EventProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setNotifications(
-      {required int eventIdx, required List<DateTime> notifications}) {
-    events[eventIdx].notifications.clear();
-    events[eventIdx].notifications.addAll(notifications);
-
-    notifyListeners();
-  }
-
-  addNotification({required int eventIdx, required DateTime notificationDate}) {
-    events[eventIdx].notifications.add(notificationDate);
+  addNotification({required int eventIdx, required DateTime notificationDate, required int uniqueId}) {
+    events[eventIdx].notifications.add(NotificationId(dateTime: notificationDate, id:uniqueId));
     notifyListeners();
   }
 
   removeNotification(
-      {required int eventIdx, required DateTime notificationDate}) {
-    events[eventIdx].notifications.remove(notificationDate);
+      {required int eventIdx, required NotificationId notification}) {
+    events[eventIdx].notifications.remove(notification);
     notifyListeners();
   }
 
-  clearNotification({required int eventIdx}) {
-    events[eventIdx].notifications.clear();
-    notifyListeners();
-  }
-
-  List<DateTime> getNotifications({required int eventIdx}) {
+  List<NotificationId> getNotifications({required int eventIdx}) {
     return events[eventIdx].notifications;
+  }
+
+  needNotifyToggle({required int eventIdx}) {
+    events[eventIdx].needNotify = !events[eventIdx].needNotify;
+    notifyListeners();
   }
 
   setNeedEndDate() {

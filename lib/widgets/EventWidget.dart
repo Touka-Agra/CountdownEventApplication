@@ -1,7 +1,9 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../models/NotificationId.dart';
 import '../models/event.dart';
 import '../pages/EventDetailsScreen.dart';
 import '../provider/EventProvider.dart';
@@ -57,11 +59,11 @@ class EventWidget extends StatelessWidget {
             ),
           ),
           onDismissed: (direction) {
+            _cancelNotificationsForEvent(event);
             eventProvider.removeEvent(event);
           },
           child: GestureDetector(
             onTap: () {
-             
               Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -103,13 +105,19 @@ class EventWidget extends StatelessWidget {
                         children: [
                           IconButton(
                             onPressed: () {
-                             
+                              eventProvider.needNotifyToggle(
+                                  eventIdx: eventIdx);
+                              if (eventProvider.events[eventIdx].needNotify) {
+                                _scheduleNotificationsForEvent(event);
+                              } else {
+                                _cancelNotificationsForEvent(event);
+                              }
                             },
                             style: ButtonStyle(
                               backgroundColor:
                                   WidgetStateProperty.all(Colors.white24),
-                              shape: WidgetStateProperty.all(
-                                  const CircleBorder()),
+                              shape:
+                                  WidgetStateProperty.all(const CircleBorder()),
                             ),
                             icon: Icon(
                               event.needNotify
@@ -171,5 +179,43 @@ class EventWidget extends StatelessWidget {
         );
       }),
     );
+  }
+}
+
+Future<void> _scheduleNotificationsForEvent(Event event) async {
+  for (NotificationId notification in event.notifications) {
+    Duration duration = event.dateTime.difference(DateTime.now());
+
+    late String timeRemaining;
+
+    if (duration.inDays > 0) {
+      timeRemaining = 'in ${duration.inDays} day${duration.inDays > 1 ? 's' : ''}';
+    } else if (duration.inHours > 0) {
+      timeRemaining =
+          'in ${duration.inHours} hour${duration.inHours > 1 ? 's' : ''}';
+    } else if (duration.inMinutes > 0) {
+      timeRemaining =
+          'in ${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''}';
+    } else {
+      timeRemaining = 'now';
+    }
+
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: notification.id,
+        channelKey: 'countdown_channel',
+        title: 'Reminder for ${event.title}',
+        body: 'Your event "${event.title}" starts $timeRemaining !',
+        notificationLayout: NotificationLayout.Default,
+        wakeUpScreen: true,
+      ),
+      schedule: NotificationCalendar.fromDate(date: notification.dateTime),
+    );
+  }
+}
+
+_cancelNotificationsForEvent(Event event) {
+  for (NotificationId notification in event.notifications) {
+    AwesomeNotifications().cancel(notification.id);
   }
 }

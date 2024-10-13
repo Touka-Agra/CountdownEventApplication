@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/event.dart';
@@ -237,6 +236,7 @@ class _EventFormState extends State<EventForm> {
                                 if (value!.isEmpty) {
                                   return "This field can't be Empty!";
                                 }
+                                return null;
                               },
                               maxLength: 32,
                               onChanged: (value) {

@@ -81,6 +81,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                 if (value!.isEmpty) {
                   return "This field can't be Empty!";
                 }
+                return null;
               },
               cursorColor: Colors.blue,
               style: const TextStyle(color: Colors.white),
