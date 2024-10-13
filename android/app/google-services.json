@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "157190576363",
+    "project_id": "count-down-7de35",
+    "storage_bucket": "count-down-7de35.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:157190576363:android:9513d9dd9bdbe5126286ae",
+        "android_client_info": {
+          "package_name": "com.example.countdown_event"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5zaukBQQT-QD6QHda_DjyaVTV3KE_9kw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:157190576363:android:26cdade5932cfdfa6286ae",
+        "android_client_info": {
+          "package_name": "com.example.finalproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5zaukBQQT-QD6QHda_DjyaVTV3KE_9kw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

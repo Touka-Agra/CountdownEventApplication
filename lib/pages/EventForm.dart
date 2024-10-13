@@ -285,7 +285,7 @@ class _EventFormState extends State<EventForm> {
                                   ),
                                   onChanged: (value) {
                                     needEndDate = value!;
-                                    eventProvider.setNeedEndDate();
+                                    eventProvider.needEndDate;
                                   }),
                               IgnorePointer(
                                 ignoring: !needEndDate,
