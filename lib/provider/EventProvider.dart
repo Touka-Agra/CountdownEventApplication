@@ -1,12 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import '../models/NotificationId.dart';
 import '../models/event.dart';
 
 class EventProvider extends ChangeNotifier {
   List<Event> events = [];
+  DateTime _selectedDate = DateTime.now();
+  DateTime get selectedDate => _selectedDate;
+
   bool needEndDate = false;
+
+  // Add event and save to Firestore
   bool addEvent(Event newEvent) {
     bool response = false;
     if (!events.any((event) => event.title == newEvent.title)) {
@@ -27,6 +31,7 @@ class EventProvider extends ChangeNotifier {
     return response;
   }
 
+  // Remove event and delete from Firestore
   void removeEvent(Event event) {
     events.remove(event);
     notifyListeners();
@@ -44,80 +49,118 @@ class EventProvider extends ChangeNotifier {
         });
       }
     });
+  }
 
-    void addNotification({
-      required int eventIdx,
-      required DateTime notificationDate,
-      required int uniqueId,
-    }) {
-      events[eventIdx]
-          .notifications
-          .add(NotificationId(dateTime: notificationDate, id: uniqueId));
+  // Add notification to event and Firestore
+  void addNotification({
+    required int eventIdx,
+    required DateTime notificationDate,
+    required int uniqueId,
+  }) {
+    events[eventIdx]
+        .notifications
+        .add(NotificationId(dateTime: notificationDate, id: uniqueId));
+    notifyListeners();
+
+    FirebaseFirestore.instance
+        .collection('events')
+        .doc(events[eventIdx].title)
+        .update({
+      'notifications': FieldValue.arrayUnion([
+        {
+          'dateTime': notificationDate.toIso8601String(),
+          'id': uniqueId,
+        }
+      ])
+    }).then((_) {
+      print("Notification added");
+    }).catchError((error) {
+      print("Failed to add notification: $error");
+    });
+  }
+
+  // Remove notification from event and Firestore
+  void removeNotification({
+    required int eventIdx,
+    required NotificationId notification,
+  }) {
+    events[eventIdx].notifications.remove(notification);
+    notifyListeners();
+
+    FirebaseFirestore.instance
+        .collection('events')
+        .doc(events[eventIdx].title)
+        .update({
+      'notifications': FieldValue.arrayRemove([
+        {
+          'dateTime': notification.dateTime.toIso8601String(),
+          'id': notification.id,
+        }
+      ])
+    }).then((_) {
+      print("Notification removed from Firestore");
+    }).catchError((error) {
+      print("Failed to remove notification: $error");
+    });
+  }
+
+  // Get notifications for an event
+  List<NotificationId> getNotifications({required int eventIdx}) {
+    return events[eventIdx].notifications;
+  }
+
+  // Toggle needNotify for event
+  void needNotifyToggle({required int eventIdx}) {
+    events[eventIdx].needNotify = !events[eventIdx].needNotify;
+    notifyListeners();
+  }
+
+  // Toggle needEndDate and update in Firestore
+  void toggleNeedEndDate(int eventIndex) {
+    events[eventIndex].needEndDate = !events[eventIndex].needEndDate;
+    notifyListeners();
+
+    FirebaseFirestore.instance
+        .collection('events')
+        .doc(events[eventIndex].title)
+        .update({
+      'needEndDate': events[eventIndex].needEndDate,
+    }).then((_) {
+      print("needEndDate toggled in Firestore");
+    }).catchError((error) {
+      print("Failed to toggle needEndDate: $error");
+    });
+  }
+
+  // Set selected date
+  void setDate(DateTime date) {
+    _selectedDate = date;
+    notifyListeners();
+  }
+
+  // Get events of selected date
+  List<Event> get eventsOfSelectedDate => events
+      .where((event) => event.dateTime.day == _selectedDate.day)
+      .toList();
+
+  // Edit event details
+  void editEvent(Event newEvent, Event oldEvent) {
+    final index = events.indexWhere((event) => event == oldEvent);
+    if (index != -1) {
+      events[index] = newEvent;
       notifyListeners();
 
       FirebaseFirestore.instance
           .collection('events')
-          .doc(events[eventIdx].title)
+          .doc(oldEvent.title)
           .update({
-        'notifications': FieldValue.arrayUnion([
-          {
-            'dateTime': notificationDate.toIso8601String(),
-            'id': uniqueId,
-          }
-        ])
+        'title': newEvent.title,
+        'description': newEvent.details,
+        'date': newEvent.dateTime.toIso8601String(),
       }).then((_) {
-        print("Notification added");
+        print("Event updated in Firestore");
       }).catchError((error) {
-        print("Failed to add notification: $error");
-      });
-    }
-
-    void removeNotification({
-      required int eventIdx,
-      required NotificationId notification,
-    }) {
-      events[eventIdx].notifications.remove(notification);
-      notifyListeners();
-
-      FirebaseFirestore.instance
-          .collection('events')
-          .doc(events[eventIdx].title)
-          .update({
-        'notifications': FieldValue.arrayRemove([
-          {
-            'dateTime': notification.dateTime.toIso8601String(),
-            'id': notification.id,
-          }
-        ])
-      }).then((_) {
-        print("Notification removed from Firestore");
-      }).catchError((error) {
-        print("Failed to remove notification: $error");
-      });
-    }
-
-    List<NotificationId> getNotifications({required int eventIdx}) {
-      return events[eventIdx].notifications;
-    }
-
-    needNotifyToggle({required int eventIdx}) {
-      events[eventIdx].needNotify = !events[eventIdx].needNotify;
-      notifyListeners();
-    }
-
-    void toggleNeedEndDate(int eventIndex) {
-      events[eventIndex].needEndDate = !events[eventIndex].needEndDate;
-      notifyListeners();
-
-      FirebaseFirestore.instance
-          .collection('events')
-          .doc(events[eventIndex].title)
-          .update({
-        'needEndDate': events[eventIndex].needEndDate,
-      }).then((_) {
-        print("needEndDate toggled in Firestore");
-      }).catchError((error) {
-        print("Failed to toggle needEndDate: $error");
+        print("Failed to update event: $error");
       });
     }
   }
