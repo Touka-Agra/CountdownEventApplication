@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'Customs/BottomNavBar.dart';
-import 'provider/event_provider.dart';
+
 import 'provider/EventProvider.dart';
 import 'provider/DateTimeProvider.dart';
 import 'provider/NotesProvider.dart';
@@ -60,7 +60,6 @@ class _CalendarAppState extends State<CalendarApp> {
   @override
   Widget build(BuildContext context) => MultiProvider(
           providers: [
-            
             ChangeNotifierProvider(create: (_) => EventProvider()),
             ChangeNotifierProvider(create: (_) => DateTimeProvider()),
             ChangeNotifierProvider(create: (_) => NotesProvider()),

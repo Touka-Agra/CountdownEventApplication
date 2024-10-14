@@ -1,11 +1,12 @@
+import 'package:countdown_event/pages/event_viewing_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 
 import '../models/event_data_source.dart';
-import '../pages/event_viewing_page.dart';
-import '../provider/event_provider.dart';
+
+import '../provider/EventProvider.dart';
 
 class TasksWidget extends StatefulWidget {
   const TasksWidget({super.key});
@@ -17,7 +18,7 @@ class TasksWidget extends StatefulWidget {
 class _TasksWidgetState extends State<TasksWidget> {
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<EventtProvider>(context, listen: false);
+    final provider = Provider.of<EventProvider>(context, listen: false);
     final selectedEvents = provider.eventsOfSelectedDate;
     if (selectedEvents.isEmpty) {
       return const Center(

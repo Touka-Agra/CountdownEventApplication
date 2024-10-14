@@ -132,33 +132,33 @@ class _EventFormState extends State<EventForm> {
                                                               FontWeight.w800,
                                                           fontSize: 18),
                                                     ),
-                                                    
                                                     Expanded(
                                                       child: Padding(
                                                         padding:
-                                                            const EdgeInsets.only(
+                                                            const EdgeInsets
+                                                                .only(
                                                                 right: 5.0,
                                                                 top: 8.0),
                                                         child: Align(
-                                                          alignment:
-                                                              Alignment.topRight,
+                                                          alignment: Alignment
+                                                              .topRight,
                                                           child: IconButton(
                                                             onPressed: () {
                                                               Navigator.pop(
                                                                   context);
                                                             },
                                                             style: ButtonStyle(
-                                                                shape: WidgetStateProperty.all(
-                                                                    RoundedRectangleBorder(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(
-                                                                                20))),
+                                                                shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            20))),
                                                                 backgroundColor:
                                                                     WidgetStateProperty
                                                                         .all(Colors
                                                                             .purple)),
                                                             icon: const Icon(
-                                                              Icons.check_circle,
+                                                              Icons
+                                                                  .check_circle,
                                                               color:
                                                                   Colors.white,
                                                             ),
