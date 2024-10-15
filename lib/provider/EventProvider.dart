@@ -9,6 +9,8 @@ class EventProvider extends ChangeNotifier {
   DateTime get selectedDate => _selectedDate;
 
   bool needEndDate = false;
+  
+
 
   // Add event and save to Firestore
   bool addEvent(Event newEvent) {
@@ -17,12 +19,14 @@ class EventProvider extends ChangeNotifier {
       events.add(newEvent);
       response = true;
       notifyListeners();
+      FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
 
       FirebaseFirestore.instance.collection('events').add({
         'title': newEvent.title,
         'description': newEvent.details,
         'date': newEvent.dateTime.toIso8601String(),
       }).then((value) {
+       
         print("Event Added to Firestore");
       }).catchError((error) {
         print("Failed to add event: $error");
@@ -111,13 +115,13 @@ class EventProvider extends ChangeNotifier {
 
   // Toggle needNotify for event
   void needNotifyToggle({required int eventIdx}) {
-    events[eventIdx].needNotify = !events[eventIdx].needNotify;
+    events[eventIdx].needNotify = !events[eventIdx].needNotify!;
     notifyListeners();
   }
 
   // Toggle needEndDate and update in Firestore
   void toggleNeedEndDate(int eventIndex) {
-    events[eventIndex].needEndDate = !events[eventIndex].needEndDate;
+    events[eventIndex].needEndDate = !events[eventIndex].needEndDate!;
     notifyListeners();
 
     FirebaseFirestore.instance
@@ -139,9 +143,8 @@ class EventProvider extends ChangeNotifier {
   }
 
   // Get events of selected date
-  List<Event> get eventsOfSelectedDate => events
-      .where((event) => event.dateTime.day == _selectedDate.day)
-      .toList();
+  List<Event> get eventsOfSelectedDate =>
+      events.where((event) => event.dateTime.day == _selectedDate.day).toList();
 
   // Edit event details
   void editEvent(Event newEvent, Event oldEvent) {
@@ -163,5 +166,26 @@ class EventProvider extends ChangeNotifier {
         print("Failed to update event: $error");
       });
     }
+  }
+
+  void fetchEvents() async {
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('events').get();
+    events = snapshot.docs.map((doc) {
+      return Event(
+        needEndDate: doc['needEndDate'],
+        needNotify: doc['needNotify'],
+        title: doc['title'],
+        details: doc['description'],
+        dateTime: DateTime.parse(doc['date']),
+        notifications: (doc['notifications'] ?? []).map<NotificationId>((n) {
+          return NotificationId(
+            dateTime: DateTime.parse(n['dateTime']),
+            id: n['id'],
+          );
+        }).toList(),
+      );
+    }).toList();
+    notifyListeners();
   }
 }

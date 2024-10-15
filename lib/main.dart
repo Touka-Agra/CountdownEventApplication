@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:awesome_notifications/awesome_notifications.dart'; // Import the package
-
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'Customs/BottomNavBar.dart';
-
 import 'provider/EventProvider.dart';
 import 'provider/DateTimeProvider.dart';
 import 'provider/NotesProvider.dart';
 
+
+
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   AwesomeNotifications().initialize(
-    null, // Default icon (if you have one, provide the icon path here)
+    null, 
     [
       NotificationChannel(
         channelKey: 'countdown_channel',
@@ -30,8 +30,6 @@ void main() async {
     ],
     debug: true,
   );
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
 
   runApp(const CalendarApp());
 }
@@ -47,6 +45,8 @@ class _CalendarAppState extends State<CalendarApp> {
   @override
   void initState() {
     super.initState();
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+    eventProvider.fetchEvents();
     requestNotificationPermission();
   }
 
@@ -58,19 +58,22 @@ class _CalendarAppState extends State<CalendarApp> {
   }
 
   @override
-  Widget build(BuildContext context) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider(create: (_) => EventProvider()),
-            ChangeNotifierProvider(create: (_) => DateTimeProvider()),
-            ChangeNotifierProvider(create: (_) => NotesProvider()),
-          ],
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            themeMode: ThemeMode.dark,
-            darkTheme: ThemeData.dark().copyWith(
-              scaffoldBackgroundColor: Colors.transparent,
-              hintColor: Colors.white,
-            ),
-            home: const BottomNavBar(),
-          ));
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProvider(create: (_) => DateTimeProvider()),
+        ChangeNotifierProvider(create: (_) => NotesProvider()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        themeMode: ThemeMode.dark,
+        darkTheme: ThemeData.dark().copyWith(
+          scaffoldBackgroundColor: Colors.transparent,
+          hintColor: Colors.white,
+        ),
+        home: const BottomNavBar(),
+      ),
+    );
+  }
 }

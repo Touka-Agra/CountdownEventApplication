@@ -69,6 +69,7 @@ class _EventFormState extends State<EventForm> {
                                   .dateTime,
                               needEndDate: needEndDate,
                               needNotify: true,
+                              notifications: []
                             );
 
                             if (needEndDate) {
@@ -88,7 +89,7 @@ class _EventFormState extends State<EventForm> {
                                         listen: false)
                                     .addEvent(event);
 
-                                //add the notifications
+                                
 
                                 int eventIdx = Provider.of<EventProvider>(
                                             context,

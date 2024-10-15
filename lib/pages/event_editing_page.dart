@@ -195,7 +195,8 @@ Future saveForm() async {
       dateTime: toDate,
       details: descriptionController.text,  
       needEndDate: false,
-      needNotify: false
+      needNotify: false,
+      notifications: [],
       
     );
 
