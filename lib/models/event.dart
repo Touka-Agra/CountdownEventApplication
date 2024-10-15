@@ -27,12 +27,13 @@ class Event {
   DateTime endDateTime = DateTime(0);
   List<NotificationId> notifications = [];
   bool needNotify;
+  bool isEnd = false;
 
-  Event(
-      {required this.title,
-      required this.details,
-      required this.dateTime,
-      required this.needEndDate,
-      required this.needNotify,
-      });
+  Event({
+    required this.title,
+    required this.details,
+    required this.dateTime,
+    required this.needEndDate,
+    required this.needNotify,
+  });
 }

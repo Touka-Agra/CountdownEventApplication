@@ -16,8 +16,13 @@ class EventProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  addNotification({required int eventIdx, required DateTime notificationDate, required int uniqueId}) {
-    events[eventIdx].notifications.add(NotificationId(dateTime: notificationDate, id:uniqueId));
+  addNotification(
+      {required int eventIdx,
+      required DateTime notificationDate,
+      required int uniqueId}) {
+    events[eventIdx]
+        .notifications
+        .add(NotificationId(dateTime: notificationDate, id: uniqueId));
     notifyListeners();
   }
 
@@ -33,6 +38,13 @@ class EventProvider extends ChangeNotifier {
 
   needNotifyToggle({required int eventIdx}) {
     events[eventIdx].needNotify = !events[eventIdx].needNotify;
+    notifyListeners();
+  }
+
+  setIsEnd(int eventIdx) {
+    events[eventIdx].isEnd = (events[eventIdx].needEndDate &&
+       events[eventIdx].dateTime.isBefore(DateTime.now()) &&
+      events[eventIdx].endDateTime.isAfter(DateTime.now()));
     notifyListeners();
   }
 

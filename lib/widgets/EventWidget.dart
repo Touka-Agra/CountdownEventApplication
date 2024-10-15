@@ -2,6 +2,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:rotated_corner_decoration/rotated_corner_decoration.dart';
 
 import '../models/NotificationId.dart';
 import '../models/event.dart';
@@ -19,6 +20,10 @@ class EventWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Event event =
         Provider.of<EventProvider>(context, listen: false).events[eventIdx];
+
+    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery.of(context).size.height;
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Consumer<EventProvider>(builder: (context, eventProvider, child) {
@@ -73,6 +78,21 @@ class EventWidget extends StatelessWidget {
             },
             child: Container(
               padding: const EdgeInsets.all(15),
+              foregroundDecoration: event.needEndDate
+                  ? RotatedCornerDecoration.withColor(
+                      color: Colors.purple,
+                      spanBaselineShift: 4,
+                      badgeSize: Size(h * 0.075, h * 0.075),
+                      badgeCornerRadius: const Radius.circular(15),
+                      badgeShadow:
+                          BadgeShadow(color: Colors.grey[300]!, elevation: 10),
+                      textSpan: TextSpan(
+                        text: !eventProvider.events[eventIdx].isEnd
+                            ? "Before Start"
+                            : "Before End",
+                        style: const TextStyle(fontSize: 8),
+                      ))
+                  : null,
               decoration: BoxDecoration(
                   gradient: LinearGradient(
                       colors: [Colors.blueGrey[700]!, Colors.blueGrey[400]!]),
@@ -128,16 +148,36 @@ class EventWidget extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 5),
-                          Text(format.format(event.dateTime),
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[400],
-                                  fontSize: 12,
-                                  shadows: const [
-                                    Shadow(
-                                        color: Colors.white54,
-                                        offset: Offset(0.5, 0.5))
-                                  ])),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(format.format(event.dateTime),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[400],
+                                      fontSize: 12,
+                                      shadows: const [
+                                        Shadow(
+                                            color: Colors.white54,
+                                            offset: Offset(0.5, 0.5))
+                                      ])),
+                              (event.needEndDate)
+                                  ? Text(
+                                      "to: ${format.format(event.endDateTime)}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[400],
+                                        fontSize: 12,
+                                        shadows: const [
+                                          Shadow(
+                                              color: Colors.white54,
+                                              offset: Offset(0.5, 0.5))
+                                        ],
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ],
+                          ),
                         ],
                       ),
                     ],
@@ -155,21 +195,46 @@ class EventWidget extends StatelessWidget {
                               thickness: 2,
                             )),
                       ),
-                      Column(
-                        children: [
-                          Text(
-                              "${(event.dateTime.difference(DateTime.now())).inDays}",
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 25)),
-                          const Text("days left",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12)),
-                        ],
-                      ),
+                      StreamBuilder<Object>(
+                          stream:
+                              Stream.periodic(const Duration(seconds: 1), (_) {
+                            eventProvider.setIsEnd(eventIdx);
+
+                              DateTime countdownDateTime=!eventProvider.events[eventIdx].isEnd
+                                ? event.dateTime
+                                : event.endDateTime;
+
+                      
+                             if(countdownDateTime.isBefore(DateTime.now())){
+                              return 
+                                ['0',"Passed"];
+
+                            }
+
+                            return getBiggestNonZeroUnit(countdownDateTime);
+                          }),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              List<String> remainingTime =
+                                  snapshot.data as List<String>;
+                              return Column(
+                                children: [
+                                  Text(remainingTime[0],
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 25)),
+                                  Text(remainingTime[1],
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12)),
+                                ],
+                              );
+                            } else {
+                              return const CircularProgressIndicator();
+                            }
+                          }),
                     ],
                   )
                 ],
@@ -182,6 +247,34 @@ class EventWidget extends StatelessWidget {
   }
 }
 
+List<String> getBiggestNonZeroUnit(DateTime dateTime) {
+  List<String> result = ["", ""];
+  Duration duration = dateTime.difference(DateTime.now());
+  late int timeRemaining;
+
+  if (duration.inDays > 0) {
+    timeRemaining = duration.inDays;
+    result[0] = timeRemaining.toString();
+    result[1] = 'days left';
+  } else if (duration.inHours > 0) {
+    timeRemaining = duration.inHours;
+    result[0] = timeRemaining.toString();
+    result[1] = 'hours left';
+  } else if (duration.inMinutes > 0) {
+    timeRemaining = duration.inMinutes;
+    result[0] = timeRemaining.toString();
+    result[1] = 'min left';
+  } else if (duration.inSeconds > 0) {
+    timeRemaining = duration.inSeconds;
+    result[0] = timeRemaining.toString();
+    result[1] = 'sec left';
+  } else {
+    result[0] = '0';
+    result[1] = "Passed";
+  }
+  return result;
+}
+
 Future<void> _scheduleNotificationsForEvent(Event event) async {
   for (NotificationId notification in event.notifications) {
     Duration duration = event.dateTime.difference(DateTime.now());
@@ -189,7 +282,8 @@ Future<void> _scheduleNotificationsForEvent(Event event) async {
     late String timeRemaining;
 
     if (duration.inDays > 0) {
-      timeRemaining = 'in ${duration.inDays} day${duration.inDays > 1 ? 's' : ''}';
+      timeRemaining =
+          'in ${duration.inDays} day${duration.inDays > 1 ? 's' : ''}';
     } else if (duration.inHours > 0) {
       timeRemaining =
           'in ${duration.inHours} hour${duration.inHours > 1 ? 's' : ''}';
