@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'NotificationId.dart';
 
 class Event {
@@ -18,5 +16,6 @@ class Event {
       required this.dateTime,
       required this.needEndDate,
       required this.needNotify,
+      required this.notifications,
       });
 }
