@@ -45,9 +45,9 @@ class HomePage extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF8E2DE2), // Purple
-              Color(0xFF4A00E0), // Darker Purple
-              Color(0xFF00C6FF), // Light Blue
+              Color.fromARGB(255, 144, 198, 209), 
+              Color.fromARGB(255, 126, 216, 223), 
+              Color.fromARGB(255, 65, 153, 177),
             ],
           ),
         ),

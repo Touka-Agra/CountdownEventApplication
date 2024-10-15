@@ -1,17 +1,13 @@
-
+import 'package:countdown_event/provider/EventProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/event.dart';
-import '../provider/event_provider.dart';
 import 'event_editing_page.dart';
 import 'home_page.dart';
 
-
-
-
 class EventViewingPage extends StatefulWidget {
-  final Eventt event;
+  final Event event;
 
   const EventViewingPage({super.key, required this.event});
 
@@ -65,9 +61,8 @@ class _EventViewingPageState extends State<EventViewingPage> {
               ),
               const SizedBox(height: 16),
               Text("Title: ${widget.event.title}"),
-              Text("From: ${widget.event.from}"),
-              Text("To: ${widget.event.to}"),
-              Text("Description: ${widget.event.description}"),
+              Text("From: ${widget.event.dateTime}"),
+              Text("Description: ${widget.event.details}"),
             ],
           ),
         ),
@@ -95,8 +90,8 @@ class _EventViewingPageState extends State<EventViewingPage> {
     );
 
     if (shouldDelete == true && widget.event != null) {
-      final provider = Provider.of<EventtProvider>(context, listen: false);
-      provider.deleteEvent(widget.event);
+      final provider = Provider.of<EventProvider>(context, listen: false);
+      provider.removeEvent(widget.event);
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => HomePage()));
     }
