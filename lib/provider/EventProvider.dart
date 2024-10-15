@@ -9,8 +9,6 @@ class EventProvider extends ChangeNotifier {
   DateTime get selectedDate => _selectedDate;
 
   bool needEndDate = false;
-  
-
 
   // Add event and save to Firestore
   bool addEvent(Event newEvent) {
@@ -19,14 +17,12 @@ class EventProvider extends ChangeNotifier {
       events.add(newEvent);
       response = true;
       notifyListeners();
-      FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
 
       FirebaseFirestore.instance.collection('events').add({
         'title': newEvent.title,
         'description': newEvent.details,
         'date': newEvent.dateTime.toIso8601String(),
       }).then((value) {
-       
         print("Event Added to Firestore");
       }).catchError((error) {
         print("Failed to add event: $error");
