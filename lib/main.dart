@@ -8,13 +8,11 @@ import 'provider/EventProvider.dart';
 import 'provider/DateTimeProvider.dart';
 import 'provider/NotesProvider.dart';
 
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   AwesomeNotifications().initialize(
-    null, 
+    null,
     [
       NotificationChannel(
         channelKey: 'countdown_channel',
@@ -31,7 +29,11 @@ void main() async {
     debug: true,
   );
 
-  runApp(const CalendarApp());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (_) => EventProvider()),
+    ChangeNotifierProvider(create: (_) => DateTimeProvider()),
+    ChangeNotifierProvider(create: (_) => NotesProvider()),
+  ], child: const CalendarApp()));
 }
 
 class CalendarApp extends StatefulWidget {
@@ -59,21 +61,14 @@ class _CalendarAppState extends State<CalendarApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => EventProvider()),
-        ChangeNotifierProvider(create: (_) => DateTimeProvider()),
-        ChangeNotifierProvider(create: (_) => NotesProvider()),
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        themeMode: ThemeMode.dark,
-        darkTheme: ThemeData.dark().copyWith(
-          scaffoldBackgroundColor: Colors.transparent,
-          hintColor: Colors.white,
-        ),
-        home: const BottomNavBar(),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.dark,
+      darkTheme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.transparent,
+        hintColor: Colors.white,
       ),
+      home: const BottomNavBar(),
     );
   }
 }

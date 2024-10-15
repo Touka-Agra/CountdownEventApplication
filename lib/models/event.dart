@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'NotificationId.dart';
 
 class Event {
@@ -10,14 +8,14 @@ class Event {
   DateTime endDateTime = DateTime(0);
   List<NotificationId> notifications = [];
   bool needNotify;
+  bool isEnd = false;
 
-  Event({
-    required this.title,
-    required this.details,
-    required this.dateTime,
-    required this.needEndDate,
-    required this.needNotify,
-    required this.notifications,
-    
-  });
+  Event(
+      {required this.title,
+      required this.details,
+      required this.dateTime,
+      required this.needEndDate,
+      required this.needNotify,
+      required this.notifications,
+      });
 }

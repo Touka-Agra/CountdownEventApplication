@@ -35,31 +35,10 @@ class EventProvider extends ChangeNotifier {
   void removeEvent(Event event) {
     events.remove(event);
     notifyListeners();
-
-    FirebaseFirestore.instance
-        .collection('events')
-        .where('title', isEqualTo: event.title)
-        .get()
-        .then((QuerySnapshot snapshot) {
-      for (var doc in snapshot.docs) {
-        doc.reference.delete().then((_) {
-          print("Event deleted from Firestore");
-        }).catchError((error) {
-          print("Error deleting event: $error");
-        });
-      }
-    });
   }
 
-  // Add notification to event and Firestore
-  void addNotification({
-    required int eventIdx,
-    required DateTime notificationDate,
-    required int uniqueId,
-  }) {
-    events[eventIdx]
-        .notifications
-        .add(NotificationId(dateTime: notificationDate, id: uniqueId));
+  addNotification({required int eventIdx, required DateTime notificationDate, required int uniqueId}) {
+    events[eventIdx].notifications.add(NotificationId(dateTime: notificationDate, id:uniqueId));
     notifyListeners();
 
     FirebaseFirestore.instance
@@ -135,6 +114,13 @@ class EventProvider extends ChangeNotifier {
   // Set selected date
   void setDate(DateTime date) {
     _selectedDate = date;
+    notifyListeners();
+  }
+
+  setIsEnd(int eventIdx) {
+    events[eventIdx].isEnd = (events[eventIdx].needEndDate &&
+       events[eventIdx].dateTime.isBefore(DateTime.now()) &&
+      events[eventIdx].endDateTime.isAfter(DateTime.now()));
     notifyListeners();
   }
 

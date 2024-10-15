@@ -17,8 +17,6 @@ class EventForm extends StatefulWidget {
 class _EventFormState extends State<EventForm> {
   final _formKey = GlobalKey<FormState>();
 
-  final dateTimeNow = DateTime.now();
-
   Color c = Colors.purple;
 
   final TextEditingController _titleController = TextEditingController();

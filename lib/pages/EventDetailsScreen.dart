@@ -76,10 +76,8 @@ class EventDetailsScreen extends StatelessWidget {
               // Title and date container
               Container(
                 decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      Colors.blueGrey[700]!,
-                      Colors.blueGrey[400]!
-                    ]),
+                    gradient: LinearGradient(
+                        colors: [Colors.blueGrey[700]!, Colors.blueGrey[400]!]),
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: const [
                       BoxShadow(
@@ -102,11 +100,24 @@ class EventDetailsScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(format.format(event.dateTime),
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[400],
-                                  fontSize: 15)),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(format.format(event.dateTime),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[400],
+                                      fontSize: 15)),
+                              (event.needEndDate)
+                                  ? Text(
+                                      "to: ${format.format(event.endDateTime)}",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey[400],
+                                          fontSize: 15))
+                                  : const SizedBox.shrink()
+                            ],
+                          ),
                           const Icon(Icons.edit_rounded,
                               size: 20, color: Colors.white),
                         ],
@@ -115,99 +126,94 @@ class EventDetailsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-    
+
               const SizedBox(height: 20),
-    
+
               // Countdown container
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.purple.shade300,
-                          Colors.blueGrey.shade700
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+              Consumer<EventProvider>(
+                      builder: (context, eventProvider, child) {
+                return  Column(
+                  children: [
+                    Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child:Container(
+                            decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.purple.shade300,
+                                    Colors.blueGrey.shade700
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Colors.grey,
+                                    blurRadius: 10,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ]),
+                    
+                            child: StreamBuilder<Object>(
+                                stream:
+                                    Stream.periodic(const Duration(seconds: 1), (_) {
+                                  eventProvider.setIsEnd(eventIdx);
+                    
+                                  DateTime countdownDateTime=!eventProvider.events[eventIdx].isEnd
+                                      ? event.dateTime
+                                      : event.endDateTime;
+                    
+                                  if(countdownDateTime.isBefore(DateTime.now())){
+                                    return {
+                                      'Days': '0',
+                                      'Hours': '00',
+                                      'Minutes': '00',
+                                      'Seconds': '00'
+                                    };
+                    
+                                  }
+                                  return getDurationAndUnit(countdownDateTime);
+                                }),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    Map<String, String> durations =
+                                        snapshot.data as Map<String, String>;
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        _buildTimer(
+                                            value: durations['Days']!, title: 'Days'),
+                                        _buildTimer(
+                                            value: durations['Hours']!,
+                                            title: 'Hours'),
+                                        _buildTimer(
+                                            value: durations['Minutes']!,
+                                            title: 'Minutes'),
+                                        _buildTimer(
+                                            value: durations['Seconds']!,
+                                            title: 'Seconds'),
+                                      ],
+                                    );
+                                  } else {
+                                    return const Center(child: CircularProgressIndicator());
+                                  }
+                                }),
+                          )),
+                  
+                   (event.needEndDate)
+                  ? Center(
+                    child: Text(
+                       !eventProvider.events[eventIdx].isEnd
+                            ? "Before Start"
+                            : "Before End",
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.grey,
-                          blurRadius: 10,
-                          offset: Offset(0, 3),
-                        ),
-                      ]),
-                  child: RawSlideCountdown(
-                      streamDuration: StreamDuration(
-                        config: StreamDurationConfig(
-                          countDownConfig: CountDownConfig(
-                              duration: (event.dateTime.isAfter(dateTimeNow))
-                                  ? Duration(
-                                      days: event.dateTime
-                                          .difference(dateTimeNow)
-                                          .inDays,
-                                      hours: event.dateTime.hour -
-                                          dateTimeNow.hour,
-                                      minutes: event.dateTime.minute -
-                                          dateTimeNow.minute,
-                                      seconds: event.dateTime.second -
-                                          dateTimeNow.second)
-                                  : Duration.zero),
-                        ),
-                      ),
-                      builder: (context, duration, countUp) {
-                        if (event.dateTime.isBefore(DateTime.now())) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _buildTimer(value: '0', title: 'Days'),
-                              _buildTimer(value: '00'.padLeft(2, '0'), title: 'Hours'),
-                              _buildTimer(value: '00'.padLeft(2, '0'), title: 'Minutes'),
-                              _buildTimer(value: '00'.padLeft(2, '0'), title: 'Seconds'),
-                            ],
-                          );
-                        }
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Day
-                            _buildTimer(
-                              value: duration.inDays
-                                  .toString(), 
-                              title: 'Days',
-                            ),
-    
-                            // Hours
-                            _buildTimer(
-                              value: (duration.inHours % 24)
-                                  .toString()
-                                  .padLeft(2, '0'),
-                              title: 'Hours',
-                            ),
-    
-                            // Minutes
-                            _buildTimer(
-                              value: (duration.inMinutes % 60)
-                                  .toString()
-                                  .padLeft(2, '0'),
-                              title: 'Minutes',
-                            ),
-    
-                            // Seconds
-                            _buildTimer(
-                              value: (duration.inSeconds % 60)
-                                  .toString()
-                                  .padLeft(2, '0'),
-                              title: 'Seconds',
-                            ),
-                          ],
-                        );
-                      }),
-                ),
-              ),
-    
+                  )
+                  : const SizedBox.shrink(),
+                  ],
+                );
+                    }),
+
               // Description
               Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -226,7 +232,7 @@ class EventDetailsScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.blueGrey[700], // Grey-blue background
+                          color: Colors.blueGrey[700],
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Padding(
@@ -238,8 +244,8 @@ class EventDetailsScreen extends StatelessWidget {
                                   ? Center(
                                       child: Text(
                                         "No Details",
-                                        style: TextStyle(
-                                            color: Colors.grey[400]),
+                                        style:
+                                            TextStyle(color: Colors.grey[400]),
                                       ),
                                     )
                                   : Text(
@@ -256,7 +262,7 @@ class EventDetailsScreen extends StatelessWidget {
                   ],
                 ),
               ),
-    
+
               // Notification
               NotificationWidget(
                 eventIdx: eventIdx,
@@ -275,4 +281,16 @@ Widget _buildTitle(String title) {
     style: TextStyle(
         fontWeight: FontWeight.bold, color: Colors.grey[400], fontSize: 10),
   ));
+}
+
+Map<String, String> getDurationAndUnit(DateTime dateTime) {
+  Map<String, String> result = {};
+  Duration duration = dateTime.difference(DateTime.now());
+
+  result['Days'] = duration.inDays.toString();
+  result['Hours'] = (duration.inHours % 24).toString().padLeft(2, '0');
+  result['Minutes'] = (duration.inMinutes % 60).toString().padLeft(2, '0');
+  result['Seconds'] = (duration.inSeconds % 60).toString().padLeft(2, '0');
+
+  return result;
 }
