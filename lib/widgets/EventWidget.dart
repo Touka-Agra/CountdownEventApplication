@@ -163,7 +163,7 @@ class EventWidget extends StatelessWidget {
                                       ])),
                               (event.needEndDate)
                                   ? Text(
-                                      "to: ${format.format(event.endDateTime)}",
+                                      "to: ${format.format(event.endDateTime!)}",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.grey[400],
@@ -200,12 +200,12 @@ class EventWidget extends StatelessWidget {
                               Stream.periodic(const Duration(seconds: 1), (_) {
                             eventProvider.setIsEnd(eventIdx);
 
-                              DateTime countdownDateTime=!eventProvider.events[eventIdx].isEnd
+                              DateTime? countdownDateTime=!eventProvider.events[eventIdx].isEnd
                                 ? event.dateTime
                                 : event.endDateTime;
 
                       
-                             if(countdownDateTime.isBefore(DateTime.now())){
+                             if(countdownDateTime!.isBefore(DateTime.now())){
                               return 
                                 ['0',"Passed"];
 

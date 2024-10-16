@@ -110,7 +110,7 @@ class EventDetailsScreen extends StatelessWidget {
                                       fontSize: 15)),
                               (event.needEndDate)
                                   ? Text(
-                                      "to: ${format.format(event.endDateTime)}",
+                                      "to: ${format.format(event.endDateTime!)}",
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.grey[400],
@@ -160,11 +160,11 @@ class EventDetailsScreen extends StatelessWidget {
                                     Stream.periodic(const Duration(seconds: 1), (_) {
                                   eventProvider.setIsEnd(eventIdx);
                     
-                                  DateTime countdownDateTime=!eventProvider.events[eventIdx].isEnd
+                                  DateTime? countdownDateTime=!eventProvider.events[eventIdx].isEnd
                                       ? event.dateTime
                                       : event.endDateTime;
                     
-                                  if(countdownDateTime.isBefore(DateTime.now())){
+                                  if(countdownDateTime!.isBefore(DateTime.now())){
                                     return {
                                       'Days': '0',
                                       'Hours': '00',

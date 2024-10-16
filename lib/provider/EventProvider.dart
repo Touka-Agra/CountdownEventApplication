@@ -120,7 +120,7 @@ class EventProvider extends ChangeNotifier {
   setIsEnd(int eventIdx) {
     events[eventIdx].isEnd = (events[eventIdx].needEndDate &&
        events[eventIdx].dateTime.isBefore(DateTime.now()) &&
-      events[eventIdx].endDateTime.isAfter(DateTime.now()));
+      events[eventIdx].endDateTime!.isAfter(DateTime.now()));
     notifyListeners();
   }
 
