@@ -150,7 +150,7 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  void fetchEvents() async {
+Future fetchEvents() async {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('events').get();
     events = snapshot.docs.map((doc) {
