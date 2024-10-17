@@ -9,13 +9,14 @@ class EventProvider extends ChangeNotifier {
   DateTime get selectedDate => _selectedDate;
 
   bool needEndDate = false;
-  EventProvider() {
-    fetchEvents(); // Fetch events when the provider is created
-  }
 
   // Add event and save to Firestore
   Future<void> addEvent(Event event) {
     events.add(event);
+    notifyListeners();
+
+    print(event.endDateTime);
+
     return FirebaseFirestore.instance.collection('events').add({
       'title': event.title,
       'description': event.details,
@@ -154,41 +155,40 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchEvents() async {
+  Future fetchEvents() async {
     try {
-      final snapshot =
-          await FirebaseFirestore.instance.collection('events').get();
+      if (events.isEmpty) {
+        QuerySnapshot snapshot =
+            await FirebaseFirestore.instance.collection('events').get();
 
-      if (snapshot.docs.isEmpty) {
-        events = [];
+        events = snapshot.docs.map((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          print(data['title']);
+          Event event = Event(
+            title: data['title'],
+            details: data['description'],
+            dateTime: (data['date'] as Timestamp).toDate(),
+            notifications:
+                (data['notifications'] ?? []).map<NotificationId>((n) {
+              return NotificationId(
+                dateTime: (n['dateTime'] as Timestamp).toDate(),
+                id: n['id'],
+              );
+            }).toList(),
+            needEndDate: data['needEndDate'],
+            needNotify: data['needNotify'],
+          );
+          if (event.needEndDate) {
+            event.endDateTime = (data['endDate'] as Timestamp).toDate();
+          }
+          return event;
+        }).toList();
+        print(events.length);
+
         notifyListeners();
-        return;
       }
-
-      events = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>; // Cast to a Map
-        return Event(
-          title: data['title'] ?? '',
-          details: data['description'] ?? '',
-          dateTime: (data['date'] as Timestamp)
-              .toDate(),
-          endDateTime: data['endDate'] != null
-              ? (data['endDate'] as Timestamp).toDate()
-              : null,
-          needEndDate: data['needEndDate'] ?? false,
-          needNotify: data['needNotify'] ?? false,
-          notifications: List<NotificationId>.from(
-            (data['notifications'] ?? []).map((notification) => NotificationId(
-                  dateTime: (notification['dateTime'] as Timestamp).toDate(),
-                  id: notification['id'] ?? '',
-                )),
-          ),
-        );
-      }).toList();
-
-      notifyListeners(); // Notify listeners after fetching
-    } catch (error) {
-      print("Failed to fetch events: $error");
+    } catch (e) {
+      print('Error fetching events: $e');
     }
   }
 

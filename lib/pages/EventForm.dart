@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,11 +15,9 @@ class EventForm extends StatefulWidget {
 }
 
 class _EventFormState extends State<EventForm> {
-    @override
+  @override
   void initState() {
     super.initState();
-
-    
   }
 
   final _formKey = GlobalKey<FormState>();
@@ -35,7 +32,6 @@ class _EventFormState extends State<EventForm> {
 
   @override
   void dispose() {
-    
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -43,7 +39,6 @@ class _EventFormState extends State<EventForm> {
 
   @override
   Widget build(BuildContext context) {
-   
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
@@ -78,21 +73,16 @@ class _EventFormState extends State<EventForm> {
                         child: IconButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                             
                               Event event = Event(
                                 title: _titleController.text,
                                 details: _descriptionController.text,
-                                dateTime: Provider.of<DateTimeProvider>(
-                                        context,
+                                dateTime: Provider.of<DateTimeProvider>(context,
                                         listen: false)
                                     .dateTime,
                                 needEndDate: needEndDate,
                                 needNotify: true,
                                 notifications: [],
                               );
-                               Provider.of<EventProvider>(context, listen: false).addEvent(event);
-                               
-                               
 
                               if (needEndDate) {
                                 event.endDateTime =
@@ -106,9 +96,9 @@ class _EventFormState extends State<EventForm> {
                                       .isValidEndDate ||
                                   !needEndDate) {
                                 Navigator.pop(context);
-                                // Provider.of<EventProvider>(context,
-                                //         listen: false)
-                                //     .addEvent(event);
+                                Provider.of<EventProvider>(context,
+                                        listen: false)
+                                    .addEvent(event);
 
                                 int eventIdx = Provider.of<EventProvider>(
                                             context,
@@ -153,8 +143,7 @@ class _EventFormState extends State<EventForm> {
                                                 child: Padding(
                                                   padding:
                                                       const EdgeInsets.only(
-                                                          right: 5.0,
-                                                          top: 8.0),
+                                                          right: 5.0, top: 8.0),
                                                   child: Align(
                                                     alignment:
                                                         Alignment.topRight,
@@ -163,8 +152,9 @@ class _EventFormState extends State<EventForm> {
                                                         Navigator.pop(context);
                                                       },
                                                       style: ButtonStyle(
-                                                        shape: WidgetStateProperty
-                                                            .all(
+                                                        shape:
+                                                            WidgetStateProperty
+                                                                .all(
                                                           RoundedRectangleBorder(
                                                             borderRadius:
                                                                 BorderRadius
@@ -312,8 +302,7 @@ class _EventFormState extends State<EventForm> {
                                   onChanged: (value) {
                                     setState(() {
                                       needEndDate = value!;
-                                      eventProvider
-                                          .setNeedEndDate(needEndDate);
+                                      eventProvider.setNeedEndDate(needEndDate);
                                     });
                                   },
                                 ),

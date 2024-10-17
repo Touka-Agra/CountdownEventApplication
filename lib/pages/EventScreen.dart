@@ -12,16 +12,20 @@ class EventScreen extends StatefulWidget {
   State<EventScreen> createState() => _EventScreenState();
 }
 
-class _EventScreenState extends State<EventScreen> with SingleTickerProviderStateMixin {
+class _EventScreenState extends State<EventScreen>
+    with SingleTickerProviderStateMixin {
   Color bgc = Colors.white;
   Color c = Colors.purple;
-  late final TabController _tabController = TabController(length: 2, vsync: this);
+  late final TabController _tabController =
+      TabController(length: 2, vsync: this);
 
   @override
-  void initState() {
+  void initState() 
+{
     super.initState();
+    
 
-    // Provider.of<EventProvider>(context, listen: false).fetchEvents();
+     Provider.of<EventProvider>(context, listen: false).fetchEvents();
   }
 
   @override
@@ -81,6 +85,7 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
                 return ListView.builder(
                   itemCount: eventProvider.events.length,
                   itemBuilder: (context, index) {
+                   
                     return EventWidget(eventIdx: index);
                   },
                 );
@@ -89,8 +94,8 @@ class _EventScreenState extends State<EventScreen> with SingleTickerProviderStat
           ),
 
           // History Events List
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
             child: Text("hello"), // Placeholder for history events
           ),
         ],
