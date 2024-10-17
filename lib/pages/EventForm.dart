@@ -90,9 +90,7 @@ class _EventFormState extends State<EventForm> {
                                 needNotify: true,
                                 notifications: [],
                               );
-                               Provider.of<EventProvider>(context, listen: false).addEvent(event);
-                               
-
+                              
                               if (needEndDate) {
                                 event.endDateTime =
                                     Provider.of<DateTimeProvider>(context,

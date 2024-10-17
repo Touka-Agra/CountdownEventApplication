@@ -16,18 +16,13 @@ class _EventScreenState extends State<EventScreen>
     with SingleTickerProviderStateMixin {
   Color bgc = Colors.white;
   Color c = Colors.purple;
-
   late final TabController _tabController =
       TabController(length: 2, vsync: this);
 
   @override
   void initState() {
     super.initState();
-
-    // Fetch events once when the screen initializes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<EventProvider>(context, listen: false).fetchEvents();
-    });
+    Provider.of<EventProvider>(context, listen: false).fetchEvents();
   }
 
   @override
@@ -44,60 +39,73 @@ class _EventScreenState extends State<EventScreen>
         ),
         context: context,
       ),
-      // bottomNavigationBar: BottomNavBar(),
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Recent Events List
+          // Recent Events List using FutureBuilder
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Consumer<EventProvider>(
-              builder: (context, eventProvider, child) {
-                if (eventProvider.events.isEmpty) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Lottie or image can be added here for an empty state
-                      Text(
-                        "You Have No Events Yet",
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Click Add",
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+            child: FutureBuilder<void>(
+              future: Provider.of<EventProvider>(context, listen: false)
+                  .fetchEvents(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                      child: Text("Failed to load events: ${snapshot.error}"));
+                } else {
+                  return Consumer<EventProvider>(
+                    builder: (context, eventProvider, child) {
+                      if (eventProvider.events.isEmpty) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "You Have No Events Yet",
+                              style: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold),
                             ),
-                          ),
-                          Icon(
-                            Icons.add,
-                            color: Colors.grey[500],
-                            size: 25,
-                          ),
-                        ],
-                      ),
-                    ],
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Click Add",
+                                  style: TextStyle(
+                                      color: Colors.grey[500],
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Icon(
+                                  Icons.add,
+                                  color: Colors.grey[500],
+                                  size: 25,
+                                )
+                              ],
+                            )
+                          ],
+                        );
+                      }
+                      return ListView.builder(
+                        itemCount: eventProvider.events.length,
+                        itemBuilder: (context, index) {
+                          return EventWidget(eventIdx: index);
+                        },
+                      );
+                    },
                   );
                 }
-                return ListView.builder(
-                  itemCount: eventProvider.events.length,
-                  itemBuilder: (context, index) {
-                    return EventWidget(eventIdx: index);
-                  },
-                );
               },
             ),
           ),
 
-          const Text("History Events Coming Soon..."),
+          // History Events List
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text("hello"), // Placeholder for history events
+          ),
         ],
       ),
     );
