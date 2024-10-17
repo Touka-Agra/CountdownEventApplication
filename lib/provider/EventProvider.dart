@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../models/EventHistory.dart';
 import '../models/NotificationId.dart';
 import '../models/event.dart';
 
@@ -17,53 +18,52 @@ class EventProvider extends ChangeNotifier {
   }
 
   // Add event and save to Firestore
- Future<void> addEvent(Event event) async {
-  // Add the event locally to your list and notify listeners
-  events.add(event);
-  notifyListeners();
+  Future<void> addEvent(Event event) async {
+    // Add the event locally to your list and notify listeners
+    events.add(event);
+    notifyListeners();
 
-  print(event.endDateTime);
+    print(event.endDateTime);
 
-  // Add the event to Firestore, and store the document reference to get the generated ID
-  return FirebaseFirestore.instance.collection('events').add({
-    // Initially, no event ID since Firestore will generate it
-    'title': event.title,
-    'description': event.details,
-    'date': event.dateTime,
-    'endDate': event.endDateTime,
-    'needEndDate': event.needEndDate,
-    'needNotify': event.needNotify,
-    'notifications': event.notifications
-        .map((notification) => {
-              'dateTime': notification.dateTime,
-              'id': notification.id,
-            })
-        .toList(),
-  }).then((docRef) async {
-    // Firestore generated document ID
-    String generatedId = docRef.id;
-    print("Event Added with ID: $generatedId");
+    // Add the event to Firestore, and store the document reference to get the generated ID
+    return FirebaseFirestore.instance.collection('events').add({
+      // Initially, no event ID since Firestore will generate it
+      'title': event.title,
+      'description': event.details,
+      'date': event.dateTime,
+      'endDate': event.endDateTime,
+      'needEndDate': event.needEndDate,
+      'needNotify': event.needNotify,
+      'notifications': event.notifications
+          .map((notification) => {
+                'dateTime': notification.dateTime,
+                'id': notification.id,
+              })
+          .toList(),
+    }).then((docRef) async {
+      // Firestore generated document ID
+      String generatedId = docRef.id;
+      print("Event Added with ID: $generatedId");
 
-    // Update the event ID locally
-    event.id = generatedId;
+      // Update the event ID locally
+      event.id = generatedId;
 
-    // Optionally, update the event in Firestore with the generated event ID
-    await docRef.update({'id': generatedId});
+      // Optionally, update the event in Firestore with the generated event ID
+      await docRef.update({'id': generatedId});
 
-    // Call fetchEvents to update the local list of events
-    fetchEvents();
-  }).catchError((error) {
-    print("Failed to add event: $error");
-  });
-}
-
+      // Call fetchEvents to update the local list of events
+      fetchEvents();
+    }).catchError((error) {
+      print("Failed to add event: $error");
+    });
+  }
 
   // Remove event by document ID instead of title
   Future<void> removeEvent(Event event) async {
     try {
-      String removedId=event.id;
+      String removedId = event.id;
       await eventsCollection.doc(removedId).delete();
-      events.removeWhere((e)=>e.id==removedId);
+      events.removeWhere((e) => e.id == removedId);
       notifyListeners();
       print("Event removed");
     } catch (error) {
@@ -165,7 +165,7 @@ class EventProvider extends ChangeNotifier {
       events.where((event) => event.dateTime.day == _selectedDate.day).toList();
 
   // Edit event details
-  void editEvent(Event newEvent, Event oldEvent) {
+  void editEvent({required Event newEvent,required Event oldEvent}) {
     final index = events.indexWhere((event) => event == oldEvent);
     if (index != -1) {
       events[index] = newEvent;
@@ -186,7 +186,7 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
- Future fetchEvents() async {
+  Future fetchEvents() async {
     try {
       if (events.isEmpty) {
         QuerySnapshot snapshot =
@@ -208,7 +208,7 @@ class EventProvider extends ChangeNotifier {
             }).toList(),
             needEndDate: data['needEndDate'],
             needNotify: data['needNotify'],
-            id: doc.id, 
+            id: doc.id,
           );
           if (event.needEndDate) {
             event.endDateTime = (data['endDate'] as Timestamp).toDate();
@@ -222,10 +222,27 @@ class EventProvider extends ChangeNotifier {
     } catch (e) {
       print('Error fetching events: $e');
     }
- }
+  }
 
   void setNeedEndDate(bool needEndDate) {}
-    List<NotificationId> getNotifications({required int eventIdx}) {
+  List<NotificationId> getNotifications({required int eventIdx}) {
     return events[eventIdx].notifications;
+  }
+
+  updateHistoryState(
+      {required int eventIdx, required EventHistory eventHistoryUpdate}) {
+    events[eventIdx].eventHistory = eventHistoryUpdate;
+    notifyListeners();
+  }
+
+  bool checkDateTime(int eventIdx) {
+    Event event = events[eventIdx];
+    DateTime passedDateTime = event.dateTime;
+    if (event.needEndDate) passedDateTime = event.endDateTime!;
+
+    if (passedDateTime.isBefore(DateTime.now())) {
+      return true;
+    }
+    return false;
   }
 }

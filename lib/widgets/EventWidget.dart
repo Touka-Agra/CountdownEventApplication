@@ -1,4 +1,5 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:countdown_event/models/EventHistory.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -65,6 +66,14 @@ class EventWidget extends StatelessWidget {
           ),
           onDismissed: (direction) {
             _cancelNotificationsForEvent(event);
+
+            bool isPassed = eventProvider.checkDateTime(eventIdx);
+
+            EventHistory eventHistoryUpdate = EventHistory(
+                inHistory: true, isPassed: isPassed, reason: "Deleted");
+            eventProvider.updateHistoryState(
+                eventIdx: eventIdx, eventHistoryUpdate: eventHistoryUpdate);
+
             eventProvider.removeEvent(event);
           },
           child: GestureDetector(
@@ -200,15 +209,13 @@ class EventWidget extends StatelessWidget {
                               Stream.periodic(const Duration(seconds: 1), (_) {
                             eventProvider.setIsEnd(eventIdx);
 
-                              DateTime? countdownDateTime=!eventProvider.events[eventIdx].isEnd
-                                ? event.dateTime
-                                : event.endDateTime;
+                            DateTime? countdownDateTime =
+                                !eventProvider.events[eventIdx].isEnd
+                                    ? event.dateTime
+                                    : event.endDateTime;
 
-                      
-                             if(countdownDateTime!.isBefore(DateTime.now())){
-                              return 
-                                ['0',"Passed"];
-
+                            if (countdownDateTime!.isBefore(DateTime.now())) {
+                              return ['0', "Passed"];
                             }
 
                             return getBiggestNonZeroUnit(countdownDateTime);

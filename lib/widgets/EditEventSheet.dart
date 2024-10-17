@@ -6,16 +6,16 @@ import '../models/event.dart';
 import '../provider/DateTimeProvider.dart';
 import '../provider/EventProvider.dart';
 import '../widgets/DateTimeSetterWidget.dart';
-import '../widgets/NotificationWidget.dart';
 
-class EventForm extends StatefulWidget {
-  const EventForm({super.key});
+class EditEventSheet extends StatefulWidget {
+  int eventIdx;
+  EditEventSheet({super.key, required this.eventIdx});
 
   @override
-  State<EventForm> createState() => _EventFormState();
+  State<EditEventSheet> createState() => _EditEventSheetState();
 }
 
-class _EventFormState extends State<EventForm> {
+class _EditEventSheetState extends State<EditEventSheet> {
   @override
   void initState() {
     super.initState();
@@ -25,21 +25,37 @@ class _EventFormState extends State<EventForm> {
 
   Color c = Colors.purple;
 
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  
 
-  String typingTitle = "";
-  bool needEndDate = false;
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _titleController.dispose();
+  //   _descriptionController.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
+    int eventIdx = widget.eventIdx;
+    Event event =
+        Provider.of<EventProvider>(context, listen: false).events[eventIdx];
+
+        String typingTitle = event.title;
+  bool needEndDate = event.needEndDate;
+
+    final TextEditingController _titleController =
+        TextEditingController(text: event.title);
+    final TextEditingController _descriptionController =
+        TextEditingController(text: event.details);
+
+    Provider.of<DateTimeProvider>(context, listen: false).dateTime =
+        event.dateTime;
+
+        if(event.needEndDate){
+           Provider.of<DateTimeProvider>(context, listen: false).endDateTime =
+        event.endDateTime!;
+        }
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
@@ -59,7 +75,7 @@ class _EventFormState extends State<EventForm> {
                 children: [
                   const Spacer(),
                   const Text(
-                    "Add Event",
+                    "Restore Passed Date Event",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
@@ -79,7 +95,7 @@ class _EventFormState extends State<EventForm> {
                                       listen: false)
                                   .dateTime;
 
-                              Event event = Event(
+                              Event newEvent = Event(
                                 id: '',
                                 title: _titleController.text,
                                 details: _descriptionController.text,
@@ -107,7 +123,7 @@ class _EventFormState extends State<EventForm> {
                                 Navigator.pop(context);
                                 Provider.of<EventProvider>(context,
                                         listen: false)
-                                    .addEvent(event);
+                                    .editEvent(newEvent:newEvent, oldEvent: event);
 
                                 int eventIdx = Provider.of<EventProvider>(
                                             context,
@@ -136,90 +152,6 @@ class _EventFormState extends State<EventForm> {
                                               eventHistoryUpdate);
                                 }
 
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  builder: (context) => Container(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.35,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black,
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(25.0)),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.purple,
-                                            spreadRadius: 2,
-                                            blurRadius: 5)
-                                      ],
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              const Spacer(),
-                                              const Text(
-                                                "Customize Notifications",
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w800,
-                                                  fontSize: 18,
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          right: 5.0, top: 8.0),
-                                                  child: Align(
-                                                    alignment:
-                                                        Alignment.topRight,
-                                                    child: IconButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      style: ButtonStyle(
-                                                        shape:
-                                                            WidgetStateProperty
-                                                                .all(
-                                                          RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        20),
-                                                          ),
-                                                        ),
-                                                        backgroundColor:
-                                                            WidgetStateProperty
-                                                                .all(Colors
-                                                                    .purple),
-                                                      ),
-                                                      icon: const Icon(
-                                                        Icons.check_circle,
-                                                        color: Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                         
-                                          Expanded(
-                                            child: SingleChildScrollView(
-                                              child: NotificationWidget(
-                                                eventIdx: eventIdx,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-
                                 Provider.of<DateTimeProvider>(context,
                                         listen: false)
                                     .restartDate();
@@ -227,14 +159,17 @@ class _EventFormState extends State<EventForm> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content: Text(
-                                          'Event "${_titleController.text}" added successfully')),
+                                          'Event "${_titleController.text}" restored successfully')),
                                 );
                               } else {
                                 Navigator.pop(context);
+                                Provider.of<DateTimeProvider>(context,
+                                        listen: false)
+                                    .restartDate();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text(
-                                          'Unfortunately, Event is not added')),
+                                          'Unfortunately, Event is not restored')),
                                 );
                               }
                             }

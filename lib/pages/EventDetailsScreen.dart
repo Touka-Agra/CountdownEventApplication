@@ -5,6 +5,7 @@ import 'package:slide_countdown/slide_countdown.dart';
 
 import '../models/event.dart';
 import '../provider/EventProvider.dart';
+import '../widgets/EditEventSheet.dart';
 import '../widgets/NotificationWidget.dart';
 
 class EventDetailsScreen extends StatelessWidget {
@@ -118,8 +119,15 @@ class EventDetailsScreen extends StatelessWidget {
                                   : const SizedBox.shrink()
                             ],
                           ),
-                          const Icon(Icons.edit_rounded,
-                              size: 20, color: Colors.white),
+
+                          IconButton(onPressed: (){  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (context) => EditEventSheet(
+                                          eventIdx: eventIdx,
+                                        ));}, icon:   const Icon(Icons.edit_rounded,
+                              size: 20, color: Colors.white))
+                        ,
                         ],
                       ),
                     ],
