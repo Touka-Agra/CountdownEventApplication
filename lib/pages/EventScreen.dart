@@ -24,7 +24,8 @@ class _EventScreenState extends State<EventScreen>
   void initState() {
     super.initState();
 
-    Provider.of<EventProvider>(context, listen: false).fetchEvents();
+     Provider.of<EventProvider>(context, listen: false).fetchEvents();
+     print('Calling fetchEvents...');
   }
 
   @override
