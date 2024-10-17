@@ -67,102 +67,101 @@ class _NotesViewBodyState extends State<NotesViewBody>
     _subtitleController.text = provider.activeNotes[index]['subtitle'];
     selectedDateTime = provider.activeNotes[index]['time'];
 
-    final _formKey = GlobalKey<FormState>();
-
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF1C1C1C),
-          title: const Text('Edit Note', style: TextStyle(color: Colors.white)),
-          content: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  cursorColor: Colors.blue,
-                  controller: _titleController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                    labelStyle: TextStyle(color: Colors.white70),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            // Use StatefulBuilder to manage the dialog's internal state
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1C1C1C),
+              title: const Text('Edit Note',
+                  style: TextStyle(color: Colors.white)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    cursorColor: Colors.blue,
+                    controller: _titleController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Title',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
                     ),
                   ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return "This field can't be Empty!";
-                    }
-                    return null;
+                  TextField(
+                    cursorColor: Colors.blue,
+                    controller: _subtitleController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      labelText: 'Subtitle',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    title: Text(
+                      selectedDateTime != null
+                          ? DateFormat('MMM d, y - hh:mm a')
+                              .format(selectedDateTime!)
+                          : 'Select Date & Time',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    trailing: IconButton(
+                      icon:
+                          const Icon(Icons.calendar_today, color: Colors.white),
+                      onPressed: () async {
+                        await _pickDateTime(context);
+                        setState(
+                            () {}); // Ensure the dialog is rebuilt when the date is changed
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
                   },
+                  child: const Text('Cancel',
+                      style: TextStyle(color: Colors.white)),
                 ),
-                TextField(
-                  cursorColor: Colors.blue,
-                  controller: _subtitleController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    labelText: 'Subtitle',
-                    labelStyle: TextStyle(color: Colors.white70),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
-                  ),
-                ),
-                ListTile(
-                  title: selectedDateTime != null
-                      ? Text(
-                          DateFormat('MMM d, y - hh:mm a')
-                              .format(selectedDateTime!),
-                          style: const TextStyle(color: Colors.white),
-                        )
-                      : const Text(
-                          'Select Date & Time',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.calendar_today, color: Colors.white),
-                    onPressed: () => _pickDateTime(context),
-                  ),
+                TextButton(
+                  onPressed: () {
+                    provider.editNoteAt(
+                      index,
+                      _titleController.text,
+                      _subtitleController.text,
+                      selectedDateTime ?? provider.activeNotes[index]['time'],
+                    );
+                    _titleController.clear();
+                    _subtitleController.clear();
+                    selectedDateTime = null;
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Update',
+                      style: TextStyle(color: Colors.blue)),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child:
-                  const Text('Cancel', style: TextStyle(color: Colors.white)),
-            ),
-            TextButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  provider.editNoteAt(
-                    index,
-                    _titleController.text,
-                    _subtitleController.text,
-                    selectedDateTime!,
-                  );
-
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Update', style: TextStyle(color: Colors.blue)),
-            ),
-          ],
+            );
+          },
         );
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -270,8 +269,8 @@ class _NotesViewBodyState extends State<NotesViewBody>
                                 backgroundColor:
                                     Color.fromARGB(255, 123, 147, 180),
                                 child: Text(
-                                  DateFormat('hh:mm a').format(
-                                      notesProvider.activeNotes[index]['time']),
+                                  "${DateFormat('hh:mm a').format(
+                                      notesProvider.activeNotes[index]['time'])}",
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10, // Reduced font size for time
@@ -541,91 +540,6 @@ class _NotesViewBodyState extends State<NotesViewBody>
           )
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   backgroundColor: Color.fromARGB(255, 123, 147, 180),
-      //   onPressed: () {
-      //     showDialog(
-      //       context: context,
-      //       builder: (context) {
-      //         return AlertDialog(
-      //           backgroundColor: const Color(0xFF1C1C1C),
-      //           title: const Text('New Note',
-      //               style: TextStyle(color: Colors.white)),
-      //           content: Column(
-      //             mainAxisSize: MainAxisSize.min,
-      //             children: [
-      //               TextField(
-      //                 controller: _titleController,
-      //                 cursorColor: Colors.blue,
-      //                 style: const TextStyle(color: Colors.white),
-      //                 decoration: const InputDecoration(
-      //                   labelText: 'Title',
-      //                   labelStyle: TextStyle(color: Colors.white70),
-      //                   enabledBorder: UnderlineInputBorder(
-      //                     borderSide: BorderSide(color: Colors.blue),
-      //                   ),
-      //                   focusedBorder: UnderlineInputBorder(
-      //                     borderSide: BorderSide(color: Colors.blue),
-      //                   ),
-      //                 ),
-      //               ),
-      //               TextField(
-      //                 controller: _subtitleController,
-      //                 cursorColor: Colors.blue,
-      //                 style: const TextStyle(color: Colors.white),
-      //                 decoration: const InputDecoration(
-      //                   labelText: 'Subtitle',
-      //                   labelStyle: TextStyle(color: Colors.white70),
-      //                   enabledBorder: UnderlineInputBorder(
-      //                     borderSide: BorderSide(color: Colors.blue),
-      //                   ),
-      //                   focusedBorder: UnderlineInputBorder(
-      //                     borderSide: BorderSide(color: Colors.blue),
-      //                   ),
-      //                 ),
-      //               ),
-      //               ListTile(
-      //                 title: Text(
-      //                   selectedDateTime != null
-      //                       ? DateFormat('yyyy-MM-dd – HH:mm')
-      //                           .format(selectedDateTime!)
-      //                       : 'Select Date & Time',
-      //                   style: const TextStyle(color: Colors.white),
-      //                 ),
-      //                 trailing: IconButton(
-      //                   icon: const Icon(Icons.calendar_today,
-      //                       color: Colors.white),
-      //                   onPressed: () => _pickDateTime(context),
-      //                 ),
-      //               ),
-      //             ],
-      //           ),
-      //           actions: [
-      //             TextButton(
-      //               onPressed: () {
-      //                 Navigator.pop(context);
-      //               },
-      //               child: const Text('Cancel',
-      //                   style: TextStyle(color: Colors.white)),
-      //             ),
-      //             TextButton(
-      //               onPressed: () {
-      //                 _createNote();
-      //                 Navigator.pop(context);
-      //               },
-      //               child: const Text('Create',
-      //                   style: TextStyle(color: Colors.blue)),
-      //             ),
-      //           ],
-      //         );
-      //       },
-      //     );
-      //   },
-      //   child: const Icon(
-      //     Icons.add,
-      //     color: Colors.white, // Set the foreground (icon) color
-      //   ),
-      // ),
     );
   }
 }
