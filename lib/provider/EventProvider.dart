@@ -9,9 +9,15 @@ class EventProvider extends ChangeNotifier {
   DateTime get selectedDate => _selectedDate;
 
   bool needEndDate = false;
+  final CollectionReference eventsCollection =
+      FirebaseFirestore.instance.collection('events');
+
+  EventProvider() {
+    fetchEvents(); // Fetch events when the provider is created
+  }
 
   // Add event and save to Firestore
-  Future<void> addEvent(Event event) {
+ Future<void> addEvent(Event event) {
     events.add(event);
     notifyListeners();
 
@@ -38,12 +44,20 @@ class EventProvider extends ChangeNotifier {
     });
   }
 
-  void removeEvent(Event event) {
-    events.remove(event);
-    notifyListeners();
+  // Remove event by document ID instead of title
+  Future<void> removeEvent(Event event) async {
+    try {
+      await eventsCollection.doc(event.id).delete();
+      events.remove(event);
+      notifyListeners();
+      print("Event removed");
+    } catch (error) {
+      print("Failed to remove event: $error");
+    }
   }
 
-  addNotification(
+  // Add notification to an event
+  void addNotification(
       {required int eventIdx,
       required DateTime notificationDate,
       required int uniqueId}) {
@@ -54,7 +68,7 @@ class EventProvider extends ChangeNotifier {
 
     FirebaseFirestore.instance
         .collection('events')
-        .doc(events[eventIdx].title)
+        .doc(events[eventIdx].id) // Use event ID instead of title
         .update({
       'notifications': FieldValue.arrayUnion([
         {
@@ -69,6 +83,7 @@ class EventProvider extends ChangeNotifier {
     });
   }
 
+  // Remove notification from an event
   void removeNotification({
     required int eventIdx,
     required NotificationId notification,
@@ -78,7 +93,7 @@ class EventProvider extends ChangeNotifier {
 
     FirebaseFirestore.instance
         .collection('events')
-        .doc(events[eventIdx].title)
+        .doc(events[eventIdx].id) // Use event ID instead of title
         .update({
       'notifications': FieldValue.arrayRemove([
         {
@@ -93,22 +108,20 @@ class EventProvider extends ChangeNotifier {
     });
   }
 
-  List<NotificationId> getNotifications({required int eventIdx}) {
-    return events[eventIdx].notifications;
-  }
-
+  // Toggle needNotify property
   void needNotifyToggle({required int eventIdx}) {
     events[eventIdx].needNotify = !events[eventIdx].needNotify!;
     notifyListeners();
   }
 
+  // Toggle needEndDate and update Firestore
   void toggleNeedEndDate(int eventIndex) {
     events[eventIndex].needEndDate = !events[eventIndex].needEndDate!;
     notifyListeners();
 
     FirebaseFirestore.instance
         .collection('events')
-        .doc(events[eventIndex].title)
+        .doc(events[eventIndex].id) // Use event ID instead of title
         .update({
       'needEndDate': events[eventIndex].needEndDate,
     }).then((_) {
@@ -118,11 +131,13 @@ class EventProvider extends ChangeNotifier {
     });
   }
 
+  // Set selected date
   void setDate(DateTime date) {
     _selectedDate = date;
     notifyListeners();
   }
 
+  // Set whether event has ended
   setIsEnd(int eventIdx) {
     events[eventIdx].isEnd = (events[eventIdx].needEndDate &&
         events[eventIdx].dateTime.isBefore(DateTime.now()) &&
@@ -130,6 +145,7 @@ class EventProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Get events for the selected date
   List<Event> get eventsOfSelectedDate =>
       events.where((event) => event.dateTime.day == _selectedDate.day).toList();
 
@@ -142,7 +158,7 @@ class EventProvider extends ChangeNotifier {
 
       FirebaseFirestore.instance
           .collection('events')
-          .doc(oldEvent.title)
+          .doc(oldEvent.id) // Use event ID instead of title
           .update({
         'title': newEvent.title,
         'description': newEvent.details,
@@ -155,7 +171,7 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  Future fetchEvents() async {
+ Future fetchEvents() async {
     try {
       if (events.isEmpty) {
         QuerySnapshot snapshot =
@@ -177,6 +193,7 @@ class EventProvider extends ChangeNotifier {
             }).toList(),
             needEndDate: data['needEndDate'],
             needNotify: data['needNotify'],
+            id: doc.id, 
           );
           if (event.needEndDate) {
             event.endDateTime = (data['endDate'] as Timestamp).toDate();
@@ -190,7 +207,10 @@ class EventProvider extends ChangeNotifier {
     } catch (e) {
       print('Error fetching events: $e');
     }
-  }
+ }
 
   void setNeedEndDate(bool needEndDate) {}
+    List<NotificationId> getNotifications({required int eventIdx}) {
+    return events[eventIdx].notifications;
+  }
 }

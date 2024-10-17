@@ -191,6 +191,7 @@ Future saveForm() async {
   if (isValid) {
     // Create the updated event
     final newEvent = Event(
+      id:'' ,
       title: titleController.text,
       dateTime: toDate,
       details: descriptionController.text,  

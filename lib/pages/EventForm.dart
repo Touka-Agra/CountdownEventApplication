@@ -74,6 +74,7 @@ class _EventFormState extends State<EventForm> {
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               Event event = Event(
+                                id: '',
                                 title: _titleController.text,
                                 details: _descriptionController.text,
                                 dateTime: Provider.of<DateTimeProvider>(context,
@@ -83,6 +84,9 @@ class _EventFormState extends State<EventForm> {
                                 needNotify: true,
                                 notifications: [],
                               );
+                            
+                               
+                               
 
                               if (needEndDate) {
                                 event.endDateTime =
