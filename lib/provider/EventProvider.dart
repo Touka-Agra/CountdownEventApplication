@@ -9,40 +9,54 @@ class EventProvider extends ChangeNotifier {
   DateTime get selectedDate => _selectedDate;
 
   bool needEndDate = false;
+  final CollectionReference eventsCollection =
+      FirebaseFirestore.instance.collection('events');
+
   EventProvider() {
     fetchEvents(); // Fetch events when the provider is created
   }
 
   // Add event and save to Firestore
-  Future<void> addEvent(Event event) {
-    events.add(event);
-    return FirebaseFirestore.instance.collection('events').add({
-      'title': event.title,
-      'description': event.details,
-      'date': event.dateTime,
-      'endDate': event.endDateTime,
-      'needEndDate': event.needEndDate,
-      'needNotify': event.needNotify,
-      'notifications': event.notifications
-          .map((notification) => {
-                'dateTime': notification.dateTime,
-                'id': notification.id,
-              })
-          .toList(),
-    }).then((value) {
-      print("Event Added");
+  Future<void> addEvent(Event event) async {
+    try {
+      final docRef = await eventsCollection.add({
+        'title': event.title,
+        'description': event.details,
+        'date': event.dateTime,
+        'endDate': event.endDateTime,
+        'needEndDate': event.needEndDate,
+        'needNotify': event.needNotify,
+        'notifications': event.notifications
+            .map((notification) => {
+                  'dateTime': notification.dateTime,
+                  'id': notification.id,
+                })
+            .toList(),
+      });
+
+      events.add(event);
+      notifyListeners();
+      print("Event Added with ID: ${docRef.id}");
       fetchEvents();
-    }).catchError((error) {
+    } catch (error) {
       print("Failed to add event: $error");
-    });
+    }
   }
 
-  void removeEvent(Event event) {
-    events.remove(event);
-    notifyListeners();
+  // Remove event by document ID instead of title
+  Future<void> removeEvent(Event event) async {
+    try {
+      await eventsCollection.doc(event.id).delete();
+      events.remove(event);
+      notifyListeners();
+      print("Event removed");
+    } catch (error) {
+      print("Failed to remove event: $error");
+    }
   }
 
-  addNotification(
+  // Add notification to an event
+  void addNotification(
       {required int eventIdx,
       required DateTime notificationDate,
       required int uniqueId}) {
@@ -53,7 +67,7 @@ class EventProvider extends ChangeNotifier {
 
     FirebaseFirestore.instance
         .collection('events')
-        .doc(events[eventIdx].title)
+        .doc(events[eventIdx].id) // Use event ID instead of title
         .update({
       'notifications': FieldValue.arrayUnion([
         {
@@ -68,6 +82,7 @@ class EventProvider extends ChangeNotifier {
     });
   }
 
+  // Remove notification from an event
   void removeNotification({
     required int eventIdx,
     required NotificationId notification,
@@ -77,7 +92,7 @@ class EventProvider extends ChangeNotifier {
 
     FirebaseFirestore.instance
         .collection('events')
-        .doc(events[eventIdx].title)
+        .doc(events[eventIdx].id) // Use event ID instead of title
         .update({
       'notifications': FieldValue.arrayRemove([
         {
@@ -92,22 +107,20 @@ class EventProvider extends ChangeNotifier {
     });
   }
 
-  List<NotificationId> getNotifications({required int eventIdx}) {
-    return events[eventIdx].notifications;
-  }
-
+  // Toggle needNotify property
   void needNotifyToggle({required int eventIdx}) {
     events[eventIdx].needNotify = !events[eventIdx].needNotify!;
     notifyListeners();
   }
 
+  // Toggle needEndDate and update Firestore
   void toggleNeedEndDate(int eventIndex) {
     events[eventIndex].needEndDate = !events[eventIndex].needEndDate!;
     notifyListeners();
 
     FirebaseFirestore.instance
         .collection('events')
-        .doc(events[eventIndex].title)
+        .doc(events[eventIndex].id) // Use event ID instead of title
         .update({
       'needEndDate': events[eventIndex].needEndDate,
     }).then((_) {
@@ -117,11 +130,13 @@ class EventProvider extends ChangeNotifier {
     });
   }
 
+  // Set selected date
   void setDate(DateTime date) {
     _selectedDate = date;
     notifyListeners();
   }
 
+  // Set whether event has ended
   setIsEnd(int eventIdx) {
     events[eventIdx].isEnd = (events[eventIdx].needEndDate &&
         events[eventIdx].dateTime.isBefore(DateTime.now()) &&
@@ -129,6 +144,7 @@ class EventProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Get events for the selected date
   List<Event> get eventsOfSelectedDate =>
       events.where((event) => event.dateTime.day == _selectedDate.day).toList();
 
@@ -141,7 +157,7 @@ class EventProvider extends ChangeNotifier {
 
       FirebaseFirestore.instance
           .collection('events')
-          .doc(oldEvent.title)
+          .doc(oldEvent.id) // Use event ID instead of title
           .update({
         'title': newEvent.title,
         'description': newEvent.details,
@@ -154,10 +170,10 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
+  // Fetch events from Firestore
   Future<void> fetchEvents() async {
     try {
-      final snapshot =
-          await FirebaseFirestore.instance.collection('events').get();
+      final snapshot = await eventsCollection.get();
 
       if (snapshot.docs.isEmpty) {
         events = [];
@@ -166,12 +182,12 @@ class EventProvider extends ChangeNotifier {
       }
 
       events = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>; // Cast to a Map
+        final data = doc.data() as Map<String, dynamic>;
         return Event(
+          id: doc.id, // Assign Firestore document ID to the event
           title: data['title'] ?? '',
           details: data['description'] ?? '',
-          dateTime: (data['date'] as Timestamp)
-              .toDate(),
+          dateTime: (data['date'] as Timestamp).toDate(),
           endDateTime: data['endDate'] != null
               ? (data['endDate'] as Timestamp).toDate()
               : null,
@@ -186,7 +202,7 @@ class EventProvider extends ChangeNotifier {
         );
       }).toList();
 
-      notifyListeners(); // Notify listeners after fetching
+      notifyListeners();
     } catch (error) {
       print("Failed to fetch events: $error");
     }
