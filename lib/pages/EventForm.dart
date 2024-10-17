@@ -1,4 +1,5 @@
- import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/event.dart';
@@ -23,19 +24,41 @@ class _EventFormState extends State<EventForm> {
   final TextEditingController _descriptionController = TextEditingController();
 
   String typingTitle = "";
-
   bool needEndDate = false;
 
   @override
+  void dispose() {
+    // Dispose controllers to avoid memory leaks
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    CollectionReference events = FirebaseFirestore.instance.collection('events');
+
+    Future<void> addEvent() {
+      return events
+          .add({
+            'title': _titleController.text,
+            'description': _descriptionController.text,
+            'date': Provider.of<DateTimeProvider>(context, listen: false)
+                .dateTime, // Add event date
+          })
+          .then((value) => print("Event Added"))
+          .catchError((error) => print("Failed to add event: $error"));
+    }
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-          boxShadow: [
-            BoxShadow(color: Colors.purple, spreadRadius: 2, blurRadius: 5)
-          ]),
+        color: Colors.black,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+        boxShadow: [
+          BoxShadow(color: Colors.purple, spreadRadius: 2, blurRadius: 5)
+        ],
+      ),
       child: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Form(
@@ -48,9 +71,10 @@ class _EventFormState extends State<EventForm> {
                   const Text(
                     "Add Event",
                     style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    ),
                   ),
                   Expanded(
                     child: Padding(
@@ -59,35 +83,35 @@ class _EventFormState extends State<EventForm> {
                         alignment: Alignment.topRight,
                         child: IconButton(
                           onPressed: () {
-                            Event event = Event(
-                              title: _titleController.text,
-                              details: _descriptionController.text,
-                              dateTime: Provider.of<DateTimeProvider>(context,
-                                      listen: false)
-                                  .dateTime,
-                              needEndDate: needEndDate,
-                              needNotify: true,
-                              notifications: []
-                            );
-
-                            if (needEndDate) {
-                              event.endDateTime = Provider.of<DateTimeProvider>(
-                                      context,
-                                      listen: false)
-                                  .endDateTime;
-                            }
-
-                            if (Provider.of<DateTimeProvider>(context,
+                            if (_formKey.currentState!.validate()) {
+                              addEvent();
+                              Event event = Event(
+                                title: _titleController.text,
+                                details: _descriptionController.text,
+                                dateTime: Provider.of<DateTimeProvider>(
+                                        context,
                                         listen: false)
-                                    .isValidEndDate ||
-                                !needEndDate) {
-                              if (_formKey.currentState!.validate()) {
+                                    .dateTime,
+                                needEndDate: needEndDate,
+                                needNotify: true,
+                                notifications: [],
+                              );
+
+                              if (needEndDate) {
+                                event.endDateTime =
+                                    Provider.of<DateTimeProvider>(context,
+                                            listen: false)
+                                        .endDateTime;
+                              }
+
+                              if (Provider.of<DateTimeProvider>(context,
+                                          listen: false)
+                                      .isValidEndDate ||
+                                  !needEndDate) {
                                 Navigator.pop(context);
                                 Provider.of<EventProvider>(context,
                                         listen: false)
                                     .addEvent(event);
-
-                                
 
                                 int eventIdx = Provider.of<EventProvider>(
                                             context,
@@ -97,113 +121,116 @@ class _EventFormState extends State<EventForm> {
                                     1;
 
                                 showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (context) => Container(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.35,
-                                          decoration: const BoxDecoration(
-                                              color: Colors.black,
-                                              borderRadius:
-                                                  BorderRadius.vertical(
-                                                      top: Radius.circular(
-                                                          25.0)),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                    color: Colors.purple,
-                                                    spreadRadius: 2,
-                                                    blurRadius: 5)
-                                              ]),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Column(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    const Spacer(),
-                                                    const Text(
-                                                      "Customize Notifications",
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.w800,
-                                                          fontSize: 18),
-                                                    ),
-                                                    Expanded(
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                right: 5.0,
-                                                                top: 8.0),
-                                                        child: Align(
-                                                          alignment: Alignment
-                                                              .topRight,
-                                                          child: IconButton(
-                                                            onPressed: () {
-                                                              Navigator.pop(
-                                                                  context);
-                                                            },
-                                                            style: ButtonStyle(
-                                                                shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            20))),
-                                                                backgroundColor:
-                                                                    WidgetStateProperty
-                                                                        .all(Colors
-                                                                            .purple)),
-                                                            icon: const Icon(
-                                                              Icons
-                                                                  .check_circle,
-                                                              color:
-                                                                  Colors.white,
-                                                            ),
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (context) => Container(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.35,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black,
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(25.0)),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.purple,
+                                            spreadRadius: 2,
+                                            blurRadius: 5)
+                                      ],
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              const Spacer(),
+                                              const Text(
+                                                "Customize Notifications",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w800,
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 5.0,
+                                                          top: 8.0),
+                                                  child: Align(
+                                                    alignment:
+                                                        Alignment.topRight,
+                                                    child: IconButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      style: ButtonStyle(
+                                                        shape: WidgetStateProperty
+                                                            .all(
+                                                          RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20),
                                                           ),
                                                         ),
+                                                        backgroundColor:
+                                                            WidgetStateProperty
+                                                                .all(Colors
+                                                                    .purple),
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Expanded(
-                                                  child: SingleChildScrollView(
-                                                    child: NotificationWidget(
-                                                      eventIdx: eventIdx,
+                                                      icon: const Icon(
+                                                        Icons.check_circle,
+                                                        color: Colors.white,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ],
+                                              ),
+                                            ],
+                                          ),
+                                          Expanded(
+                                            child: SingleChildScrollView(
+                                              child: NotificationWidget(
+                                                eventIdx: eventIdx,
+                                              ),
                                             ),
                                           ),
-                                        ));
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
 
                                 Provider.of<DateTimeProvider>(context,
                                         listen: false)
                                     .restartDate();
 
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            'Event is added successfully')));
+                                  SnackBar(
+                                      content: Text(
+                                          'Event "${_titleController.text}" added successfully')),
+                                );
+                              } else {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Unfortunately, Event is not added')),
+                                );
                               }
-                            } else {
-                              Navigator.pop(context);
-
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(
-                                content:
-                                    Text('Unfortunatlly,Event is not added'),
-                              ));
                             }
                           },
                           style: ButtonStyle(
-                              shape: WidgetStateProperty.all(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20))),
-                              backgroundColor:
-                                  WidgetStateProperty.all(Colors.purple)),
+                            shape: WidgetStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            backgroundColor:
+                                WidgetStateProperty.all(Colors.purple),
+                          ),
                           icon: const Icon(
                             Icons.check_circle,
                             color: Colors.white,
@@ -211,123 +238,132 @@ class _EventFormState extends State<EventForm> {
                         ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
 
-              //title
+              // Title Field
               Expanded(
                 child: SingleChildScrollView(
-                    child: Column(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
+                  child: Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
                           color: Colors.grey[700],
-                          borderRadius: BorderRadius.circular(20)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextFormField(
-                              controller: _titleController,
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return "This field can't be Empty!";
-                                }
-                                return null;
-                              },
-                              maxLength: 32,
-                              onChanged: (value) {
-                                setState(() {
-                                  typingTitle = value;
-                                });
-                              },
-                              decoration: InputDecoration(
-                                hintText: "Title",
-                                helperStyle: TextStyle(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextFormField(
+                                controller: _titleController,
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "This field can't be Empty!";
+                                  }
+                                  return null;
+                                },
+                                maxLength: 32,
+                                onChanged: (value) {
+                                  setState(() {
+                                    typingTitle = value;
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  hintText: "Title",
+                                  helperStyle: TextStyle(
                                     color: typingTitle.length < 32
                                         ? Colors.white
-                                        : Colors.red),
-                                focusColor: Colors.purple,
+                                        : Colors.red,
+                                  ),
+                                  focusColor: Colors.purple,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
 
-                    //set date
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: DateTimeSetterWidget(isStart: true),
-                    ),
+                      // Set Date
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: DateTimeSetterWidget(isStart: true),
+                      ),
 
-                    //end date
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Consumer<EventProvider>(
-                          builder: (context, eventProvider, child) {
-                        return Opacity(
-                          opacity: needEndDate ? 1.0 : 0.5,
-                          child: Column(
-                            children: [
-                              CheckboxListTile(
+                      // End Date
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Consumer<EventProvider>(
+                            builder: (context, eventProvider, child) {
+                          return Opacity(
+                            opacity: needEndDate ? 1.0 : 0.5,
+                            child: Column(
+                              children: [
+                                CheckboxListTile(
                                   value: needEndDate,
                                   checkColor: c,
                                   title: const Text(
                                     "Set End Date",
                                     style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   onChanged: (value) {
-                                    needEndDate = value!;
-                                    eventProvider.needEndDate;
-                                  }),
-                              IgnorePointer(
-                                ignoring: !needEndDate,
-                                child: DateTimeSetterWidget(
-                                  isStart: false,
+                                    setState(() {
+                                      needEndDate = value!;
+                                      eventProvider
+                                          .setNeedEndDate(needEndDate);
+                                    });
+                                  },
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ),
+                                IgnorePointer(
+                                  ignoring: !needEndDate,
+                                  child: DateTimeSetterWidget(
+                                    isStart: false,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
 
-                    //description
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Details",
-                            style: TextStyle(
+                      // Description Field
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Details",
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 10),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: TextFormField(
-                              controller: _descriptionController,
-                              maxLines: 8,
-                              decoration: const InputDecoration(
-                                hintText: "Write Event Details",
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          )
-                        ],
+                            const SizedBox(height: 10),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: TextFormField(
+                                controller: _descriptionController,
+                                maxLines: 8,
+                                decoration: const InputDecoration(
+                                  hintText: "Write Event Details",
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                )),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
@@ -338,9 +374,12 @@ class _EventFormState extends State<EventForm> {
 }
 
 Widget _buildTitle(String title) {
-  return (Text(
+  return Text(
     title,
     style: TextStyle(
-        fontWeight: FontWeight.bold, color: Colors.grey[400], fontSize: 10),
-  ));
+      fontWeight: FontWeight.bold,
+      color: Colors.grey[400],
+      fontSize: 10,
+    ),
+  );
 }
