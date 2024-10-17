@@ -26,6 +26,7 @@ class _EventScreenState extends State<EventScreen>
     
 
      Provider.of<EventProvider>(context, listen: false).fetchEvents();
+     print('Calling fetchEvents...');
   }
 
   @override

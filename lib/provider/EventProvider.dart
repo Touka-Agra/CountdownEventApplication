@@ -187,42 +187,53 @@ class EventProvider extends ChangeNotifier {
   }
 
  Future fetchEvents() async {
-    try {
-      if (events.isEmpty) {
-        QuerySnapshot snapshot =
-            await FirebaseFirestore.instance.collection('events').get();
+  try {
+    if (events.isEmpty) {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('events').get();
 
-        events = snapshot.docs.map((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          print(data['title']);
-          Event event = Event(
-            title: data['title'],
-            details: data['description'],
-            dateTime: (data['date'] as Timestamp).toDate(),
-            notifications:
-                (data['notifications'] ?? []).map<NotificationId>((n) {
-              return NotificationId(
-                dateTime: (n['dateTime'] as Timestamp).toDate(),
-                id: n['id'],
-              );
-            }).toList(),
-            needEndDate: data['needEndDate'],
-            needNotify: data['needNotify'],
-            id: doc.id, 
-          );
-          if (event.needEndDate) {
-            event.endDateTime = (data['endDate'] as Timestamp).toDate();
-          }
-          return event;
-        }).toList();
-        print(events.length);
+      events = snapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        print(data['title']);
+        
+        Event event = Event(
+          title: data['title'],
+          details: data['description'],
+          // Check if date is a Timestamp, otherwise parse from String
+          dateTime: data['date'] is Timestamp
+              ? (data['date'] as Timestamp).toDate()
+              : DateTime.parse(data['date']),
+          notifications: (data['notifications'] ?? []).map<NotificationId>((n) {
+            return NotificationId(
+              // Handle notifications date similarly
+              dateTime: n['dateTime'] is Timestamp
+                  ? (n['dateTime'] as Timestamp).toDate()
+                  : DateTime.parse(n['dateTime']),
+              id: n['id'],
+            );
+          }).toList(),
+          needEndDate: data['needEndDate'],
+          needNotify: data['needNotify'],
+          id: doc.id,
+        );
 
-        notifyListeners();
-      }
-    } catch (e) {
-      print('Error fetching events: $e');
+        if (event.needEndDate) {
+          // Same check for endDate field
+          event.endDateTime = data['endDate'] is Timestamp
+              ? (data['endDate'] as Timestamp).toDate()
+              : DateTime.parse(data['endDate']);
+        }
+
+        return event;
+      }).toList();
+      print(events.length);
+
+      notifyListeners();
     }
- }
+  } catch (e) {
+    print('Error fetching events: $e');
+  }
+}
 
   void setNeedEndDate(bool needEndDate) {}
     List<NotificationId> getNotifications({required int eventIdx}) {
