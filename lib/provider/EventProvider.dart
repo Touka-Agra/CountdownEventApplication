@@ -209,4 +209,7 @@ class EventProvider extends ChangeNotifier {
   }
 
   void setNeedEndDate(bool needEndDate) {}
+    List<NotificationId> getNotifications({required int eventIdx}) {
+    return events[eventIdx].notifications;
+  }
 }
