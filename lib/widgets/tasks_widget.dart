@@ -1,3 +1,4 @@
+import 'package:countdown_event/pages/EventScreen.dart';
 import 'package:countdown_event/pages/event_viewing_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -45,7 +46,7 @@ class _TasksWidgetState extends State<TasksWidget> {
             if (details.appointments == null) return;
             final event = details.appointments!.first;
             Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => EventViewingPage(event: event)));
+                builder: (context) => EventScreen()));
           },
         ));
   }

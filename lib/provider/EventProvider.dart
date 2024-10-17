@@ -165,7 +165,7 @@ class EventProvider extends ChangeNotifier {
       events.where((event) => event.dateTime.day == _selectedDate.day).toList();
 
   // Edit event details
-  void editEvent({required Event newEvent,required Event oldEvent}) {
+  void editEvent(Event newEvent, {required Event oldEvent}) {
     final index = events.indexWhere((event) => event == oldEvent);
     if (index != -1) {
       events[index] = newEvent;
@@ -197,6 +197,7 @@ class EventProvider extends ChangeNotifier {
         print(data['title']);
         
         Event event = Event(
+          eventHistory: data['eventHistory'],
           title: data['title'],
           details: data['description'],
           // Check if date is a Timestamp, otherwise parse from String

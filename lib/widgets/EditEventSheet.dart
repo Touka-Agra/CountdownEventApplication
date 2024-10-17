@@ -123,7 +123,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                 Navigator.pop(context);
                                 Provider.of<EventProvider>(context,
                                         listen: false)
-                                    .editEvent(newEvent:newEvent, oldEvent: event);
+                                    .editEvent(newEvent, oldEvent: event);
 
                                 int eventIdx = Provider.of<EventProvider>(
                                             context,
