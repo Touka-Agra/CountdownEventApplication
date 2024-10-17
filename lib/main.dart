@@ -8,31 +8,26 @@ import 'provider/EventProvider.dart';
 import 'provider/DateTimeProvider.dart';
 import 'provider/NotesProvider.dart';
 
-void main() async {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  
-  try {
-    await Firebase.initializeApp();
-    await AwesomeNotifications().initialize(
-      null,
-      [
-        NotificationChannel(
-          channelKey: 'countdown_channel',
-          channelName: 'Countdown Notification',
-          channelDescription: 'Notification channel for countdown tests',
-          defaultColor: Colors.purple,
-          ledColor: Colors.white,
-          importance: NotificationImportance.Max,
-          playSound: true,
-          enableVibration: true,
-          vibrationPattern: highVibrationPattern,
-        ),
-      ],
-      debug: true,
-    );
-  } catch (e) {
-    print('Error initializing Firebase or Awesome Notifications: $e');
-  }
+  await Firebase.initializeApp();
+  AwesomeNotifications().initialize(
+    null,
+    [
+      NotificationChannel(
+        channelKey: 'countdown_channel',
+        channelName: 'Countdown Notification',
+        channelDescription: 'Notification channel for countdown tests',
+        defaultColor: Colors.purple,
+        ledColor: Colors.white,
+        importance: NotificationImportance.Max,
+        playSound: true,
+        enableVibration: true,
+        vibrationPattern: highVibrationPattern,
+      ),
+    ],
+    debug: true,
+  );
 
   runApp(
     MultiProvider(

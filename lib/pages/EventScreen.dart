@@ -21,16 +21,30 @@ class _EventScreenState extends State<EventScreen>
       TabController(length: 2, vsync: this);
 
   @override
+  void initState() {
+    super.initState();
+
+    // Fetch events once when the screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<EventProvider>(context, listen: false).fetchEvents();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: getAppBar(title: "Your Events", tabBar: TabBar(
-        controller: _tabController,
-        tabs: const [
-          Tab(text: "Upcoming"),
-          Tab(text: "History"),
-        ],
-      ), context: context,),
-      //bottomNavigationBar: BottomNavBar(),
+      appBar: getAppBar(
+        title: "Your Events",
+        tabBar: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: "Upcoming"),
+            Tab(text: "History"),
+          ],
+        ),
+        context: context,
+      ),
+      // bottomNavigationBar: BottomNavBar(),
       body: TabBarView(
         controller: _tabController,
         children: [
@@ -38,48 +52,54 @@ class _EventScreenState extends State<EventScreen>
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Consumer<EventProvider>(
-                builder: (context, eventProvider, child) {
-                  if(eventProvider.events.isEmpty){
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        //lottie
-                        Text("You Have No Events Yet", style: TextStyle(color: Colors.grey[500], fontSize: 20, fontWeight: FontWeight.bold)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Click Add", style: TextStyle(color: Colors.grey[500], fontSize: 20, fontWeight: FontWeight.bold)),
-                            Icon(Icons.add, color: Colors.grey[500], size: 25,)
-                          ],
-                        )
-
-                      ],
-                    );
-                  }
-              return ListView.builder(
-                itemCount: eventProvider.events.length,
-                itemBuilder: (context, index) {
-                  return EventWidget(eventIdx: index);
-                },
-              );
-            }),
+              builder: (context, eventProvider, child) {
+                if (eventProvider.events.isEmpty) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Lottie or image can be added here for an empty state
+                      Text(
+                        "You Have No Events Yet",
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Click Add",
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Icon(
+                            Icons.add,
+                            color: Colors.grey[500],
+                            size: 25,
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                }
+                return ListView.builder(
+                  itemCount: eventProvider.events.length,
+                  itemBuilder: (context, index) {
+                    return EventWidget(eventIdx: index);
+                  },
+                );
+              },
+            ),
           ),
 
-          // History Events List
-          Text("hello")
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: ListView.builder(
-          //     itemCount: historyEvents.length,
-          //     itemBuilder: (context, index) {
-          //       return EventWidget(event: historyEvents[index]);
-          //     },
-          //   ),
-          // ),
+          const Text("History Events Coming Soon..."),
         ],
       ),
     );
   }
 }
-
-

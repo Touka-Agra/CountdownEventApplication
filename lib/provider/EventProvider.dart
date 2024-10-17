@@ -11,27 +11,28 @@ class EventProvider extends ChangeNotifier {
   bool needEndDate = false;
 
   // Add event and save to Firestore
-  bool addEvent(Event newEvent) {
-    bool response = false;
-    if (!events.any((event) => event.title == newEvent.title)) {
-      events.add(newEvent);
-      response = true;
-      notifyListeners();
+ Future<void> addEvent(Event event) {
+  return FirebaseFirestore.instance.collection('events').add({
+    'title': event.title,
+    'description': event.details,
+    'date': event.dateTime,  
+    'endDate': event.endDateTime,  
+    'needEndDate': event.needEndDate, 
+    'needNotify': event.needNotify,   
+    'notifications': event.notifications.map((notification) => {
+      'dateTime': notification.dateTime, 
+      'id': notification.id,
+    }).toList(),
+  }).then((value) {
+    print("Event Added");
+    fetchEvents();  
+  }).catchError((error) {
+    print("Failed to add event: $error");
+  });
+}
 
-      FirebaseFirestore.instance.collection('events').add({
-        'title': newEvent.title,
-        'description': newEvent.details,
-        'date': newEvent.dateTime.toIso8601String(),
-      }).then((value) {
-        print("Event Added to Firestore");
-      }).catchError((error) {
-        print("Failed to add event: $error");
-      });
-    }
-    return response;
-  }
 
-  // Remove event and delete from Firestore
+ 
   void removeEvent(Event event) {
     events.remove(event);
     notifyListeners();
@@ -58,7 +59,7 @@ class EventProvider extends ChangeNotifier {
     });
   }
 
-  // Remove notification from event and Firestore
+
   void removeNotification({
     required int eventIdx,
     required NotificationId notification,
@@ -83,18 +84,17 @@ class EventProvider extends ChangeNotifier {
     });
   }
 
-  // Get notifications for an event
+  
   List<NotificationId> getNotifications({required int eventIdx}) {
     return events[eventIdx].notifications;
   }
 
-  // Toggle needNotify for event
+  
   void needNotifyToggle({required int eventIdx}) {
     events[eventIdx].needNotify = !events[eventIdx].needNotify!;
     notifyListeners();
   }
 
-  // Toggle needEndDate and update in Firestore
   void toggleNeedEndDate(int eventIndex) {
     events[eventIndex].needEndDate = !events[eventIndex].needEndDate!;
     notifyListeners();
@@ -111,7 +111,7 @@ class EventProvider extends ChangeNotifier {
     });
   }
 
-  // Set selected date
+  
   void setDate(DateTime date) {
     _selectedDate = date;
     notifyListeners();
@@ -124,7 +124,7 @@ class EventProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Get events of selected date
+  
   List<Event> get eventsOfSelectedDate =>
       events.where((event) => event.dateTime.day == _selectedDate.day).toList();
 
@@ -151,23 +151,34 @@ class EventProvider extends ChangeNotifier {
   }
 
 Future fetchEvents() async {
+  try {
     QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('events').get();
+    
     events = snapshot.docs.map((doc) {
+    
       return Event(
         needEndDate: doc['needEndDate'],
         needNotify: doc['needNotify'],
         title: doc['title'],
         details: doc['description'],
-        dateTime: DateTime.parse(doc['date']),
+        dateTime: (doc['date'] as Timestamp).toDate(), 
         notifications: (doc['notifications'] ?? []).map<NotificationId>((n) {
           return NotificationId(
-            dateTime: DateTime.parse(n['dateTime']),
+            dateTime: (n['dateTime'] as Timestamp).toDate(),
             id: n['id'],
           );
         }).toList(),
       );
     }).toList();
+    
+   
     notifyListeners();
+  } catch (e) {
+    print('Error fetching events: $e');
   }
+}
+
+
+  void setNeedEndDate(bool needEndDate) {}
 }

@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +16,13 @@ class EventForm extends StatefulWidget {
 }
 
 class _EventFormState extends State<EventForm> {
+    @override
+  void initState() {
+    super.initState();
+
+    
+  }
+
   final _formKey = GlobalKey<FormState>();
 
   Color c = Colors.purple;
@@ -28,7 +35,7 @@ class _EventFormState extends State<EventForm> {
 
   @override
   void dispose() {
-    // Dispose controllers to avoid memory leaks
+    
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -36,20 +43,7 @@ class _EventFormState extends State<EventForm> {
 
   @override
   Widget build(BuildContext context) {
-    CollectionReference events = FirebaseFirestore.instance.collection('events');
-
-    Future<void> addEvent() {
-      return events
-          .add({
-            'title': _titleController.text,
-            'description': _descriptionController.text,
-            'date': Provider.of<DateTimeProvider>(context, listen: false)
-                .dateTime, // Add event date
-          })
-          .then((value) => print("Event Added"))
-          .catchError((error) => print("Failed to add event: $error"));
-    }
-
+   
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
@@ -84,7 +78,7 @@ class _EventFormState extends State<EventForm> {
                         child: IconButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              addEvent();
+                             
                               Event event = Event(
                                 title: _titleController.text,
                                 details: _descriptionController.text,
@@ -96,6 +90,8 @@ class _EventFormState extends State<EventForm> {
                                 needNotify: true,
                                 notifications: [],
                               );
+                               Provider.of<EventProvider>(context, listen: false).addEvent(event);
+                               
 
                               if (needEndDate) {
                                 event.endDateTime =
