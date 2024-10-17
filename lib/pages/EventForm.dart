@@ -90,7 +90,10 @@ class _EventFormState extends State<EventForm> {
                                 needNotify: true,
                                 notifications: [],
                               );
-                              
+                               Provider.of<EventProvider>(context, listen: false).addEvent(event);
+                               
+                               
+
                               if (needEndDate) {
                                 event.endDateTime =
                                     Provider.of<DateTimeProvider>(context,
@@ -103,9 +106,9 @@ class _EventFormState extends State<EventForm> {
                                       .isValidEndDate ||
                                   !needEndDate) {
                                 Navigator.pop(context);
-                                Provider.of<EventProvider>(context,
-                                        listen: false)
-                                    .addEvent(event);
+                                // Provider.of<EventProvider>(context,
+                                //         listen: false)
+                                //     .addEvent(event);
 
                                 int eventIdx = Provider.of<EventProvider>(
                                             context,

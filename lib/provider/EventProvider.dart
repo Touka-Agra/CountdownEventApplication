@@ -9,6 +9,9 @@ class EventProvider extends ChangeNotifier {
   DateTime get selectedDate => _selectedDate;
 
   bool needEndDate = false;
+  EventProvider() {
+    fetchEvents(); // Fetch events when the provider is created
+  }
 
   // Add event and save to Firestore
   Future<void> addEvent(Event event) {
@@ -151,30 +154,41 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  Future fetchEvents() async {
+  Future<void> fetchEvents() async {
     try {
-      QuerySnapshot snapshot =
+      final snapshot =
           await FirebaseFirestore.instance.collection('events').get();
 
+      if (snapshot.docs.isEmpty) {
+        events = [];
+        notifyListeners();
+        return;
+      }
+
       events = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>; // Cast to a Map
         return Event(
-          needEndDate: doc['needEndDate'],
-          needNotify: doc['needNotify'],
-          title: doc['title'],
-          details: doc['description'],
-          dateTime: (doc['date'] as Timestamp).toDate(),
-          notifications: (doc['notifications'] ?? []).map<NotificationId>((n) {
-            return NotificationId(
-              dateTime: (n['dateTime'] as Timestamp).toDate(),
-              id: n['id'],
-            );
-          }).toList(),
+          title: data['title'] ?? '',
+          details: data['description'] ?? '',
+          dateTime: (data['date'] as Timestamp)
+              .toDate(),
+          endDateTime: data['endDate'] != null
+              ? (data['endDate'] as Timestamp).toDate()
+              : null,
+          needEndDate: data['needEndDate'] ?? false,
+          needNotify: data['needNotify'] ?? false,
+          notifications: List<NotificationId>.from(
+            (data['notifications'] ?? []).map((notification) => NotificationId(
+                  dateTime: (notification['dateTime'] as Timestamp).toDate(),
+                  id: notification['id'] ?? '',
+                )),
+          ),
         );
       }).toList();
 
-      notifyListeners();
-    } catch (e) {
-      print('Error fetching events: $e');
+      notifyListeners(); // Notify listeners after fetching
+    } catch (error) {
+      print("Failed to fetch events: $error");
     }
   }
 
