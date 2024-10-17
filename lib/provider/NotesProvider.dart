@@ -96,15 +96,11 @@ class NotesProvider with ChangeNotifier {
     noteToDelete['subtitle'] += "   Deleted";
     historyNotes.add(noteToDelete);
 
-    // Remove note from Firestore
+    
     var querySnapshot = await _firestore
         .collection('notes')
-        .where('title',
-            isEqualTo:
-                noteToDelete['title']) 
-        .where('subtitle',
-            isEqualTo: noteToDelete[
-                'subtitle']) 
+        .where('title', isEqualTo: noteToDelete['title'])
+        .where('subtitle', isEqualTo: noteToDelete['subtitle'])
         .get();
 
     for (var doc in querySnapshot.docs) {
@@ -115,27 +111,20 @@ class NotesProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Delete a history note from Firestore
-  Future<void> deleteHistoryNoteAt(int index) async {
+  deleteHistoryNoteAt(int index) async {
     var noteToDelete = historyNotes[index];
-
-    // Remove note from Firestore
     var querySnapshot = await _firestore
         .collection('notes')
-        .where('title',
-            isEqualTo:
-                noteToDelete['title']) // Update condition based on your needs
-        .where('subtitle',
-            isEqualTo: noteToDelete[
-                'subtitle']) // Update condition based on your needs
+        .where('title', isEqualTo: noteToDelete['title'])
+        .where('subtitle', isEqualTo: noteToDelete['subtitle'])
         .get();
 
     for (var doc in querySnapshot.docs) {
       await doc.reference.delete();
-    }
 
-    historyNotes.removeAt(index);
-    notifyListeners();
+      historyNotes.removeAt(index);
+      notifyListeners();
+    }
   }
 
   // Edit a note in Firestore
@@ -215,29 +204,51 @@ class NotesProvider with ChangeNotifier {
     historyNotes.removeAt(index);
     notifyListeners();
   }
-  
 
-  // Fetch notes from Firestore
+// Fetch notes from Firestore
   Future<void> fetchNotes() async {
     try {
-      QuerySnapshot querySnapshot = await _firestore.collection('notes').get();
+      // Fetch active notes (where 'completed' is false)
+      QuerySnapshot activeSnapshot = await _firestore
+          .collection('notes')
+          .where('completed', isEqualTo: false)
+          .get();
+
+      // Fetch history notes (where 'completed' is true)
+      QuerySnapshot historySnapshot = await _firestore
+          .collection('notes')
+          .where('completed', isEqualTo: true)
+          .get();
 
       // Clear existing notes before fetching new ones
       activeNotes.clear();
+      historyNotes.clear();
 
-      for (var doc in querySnapshot.docs) {
+      // Populate active notes
+      for (var doc in activeSnapshot.docs) {
         activeNotes.add({
           'id': doc.id, // Include the document ID for updates/deletes
           'title': doc['title'],
           'subtitle': doc['subtitle'],
-          'time': (doc['time'] as Timestamp).toDate(), // Convert Timestamp to DateTime
+          'time': (doc['time'] as Timestamp).toDate(),
+          'completed': doc['completed'],
+        });
+      }
+
+      // Populate history notes
+      for (var doc in historySnapshot.docs) {
+        historyNotes.add({
+          'id': doc.id,
+          'title': doc['title'],
+          'subtitle': doc['subtitle'],
+          'time': (doc['time'] as Timestamp).toDate(),
           'completed': doc['completed'],
         });
       }
 
       notifyListeners(); // Notify listeners that the data has changed
     } catch (e) {
-      print("Error fetching notes: $e"); // Handle error appropriately
+      print("Error fetching notes: $e");
     }
   }
 }

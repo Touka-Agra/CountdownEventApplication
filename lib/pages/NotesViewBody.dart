@@ -60,7 +60,6 @@ class _NotesViewBodyState extends State<NotesViewBody>
         });
       }
     }
-   
   }
 
   void _editNoteAt(BuildContext context, int index) {
@@ -164,7 +163,6 @@ class _NotesViewBodyState extends State<NotesViewBody>
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     final notesProvider = Provider.of<NotesProvider>(context);
@@ -261,6 +259,7 @@ class _NotesViewBodyState extends State<NotesViewBody>
                           key: Key(index.toString()),
                           onDismissed: (direction) {
                             notesProvider.deleteNoteAt(index);
+
                             // Optionally show a snackbar or some confirmation here
                           },
                           child: Row(
@@ -271,8 +270,8 @@ class _NotesViewBodyState extends State<NotesViewBody>
                                 backgroundColor:
                                     Color.fromARGB(255, 123, 147, 180),
                                 child: Text(
-                                  "${DateFormat('hh:mm a').format(
-                                      notesProvider.activeNotes[index]['time'])}",
+                                  "${DateFormat('hh:mm a').format((notesProvider.activeNotes[index]['time'] as DateTime) // Ensure it's a DateTime
+                                      )}",
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10, // Reduced font size for time
@@ -414,7 +413,6 @@ class _NotesViewBodyState extends State<NotesViewBody>
                         key: Key(index.toString()),
                         onDismissed: (direction) {
                           notesProvider.deleteHistoryNoteAt(index);
-                          // Optionally show a snackbar or some confirmation here
                         },
                         child: Row(
                           children: [
