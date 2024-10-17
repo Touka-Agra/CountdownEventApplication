@@ -28,7 +28,7 @@ class EventWidget extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Consumer<EventProvider>(builder: (context, eventProvider, child) {
         return Dismissible(
-          key: Key(eventIdx.toString()),
+          key: Key(event.id),
           direction: DismissDirection.endToStart,
           background: Container(
             decoration: BoxDecoration(

@@ -61,8 +61,9 @@ class EventProvider extends ChangeNotifier {
   // Remove event by document ID instead of title
   Future<void> removeEvent(Event event) async {
     try {
-      await eventsCollection.doc(event.id).delete();
-      events.remove(event);
+      String removedId=event.id;
+      await eventsCollection.doc(removedId).delete();
+      events.removeWhere((e)=>e.id==removedId);
       notifyListeners();
       print("Event removed");
     } catch (error) {
