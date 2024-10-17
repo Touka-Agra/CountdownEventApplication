@@ -17,32 +17,46 @@ class EventProvider extends ChangeNotifier {
   }
 
   // Add event and save to Firestore
- Future<void> addEvent(Event event) {
-    events.add(event);
-    notifyListeners();
+ Future<void> addEvent(Event event) async {
+  // Add the event locally to your list and notify listeners
+  events.add(event);
+  notifyListeners();
 
-    print(event.endDateTime);
+  print(event.endDateTime);
 
-    return FirebaseFirestore.instance.collection('events').add({
-      'title': event.title,
-      'description': event.details,
-      'date': event.dateTime,
-      'endDate': event.endDateTime,
-      'needEndDate': event.needEndDate,
-      'needNotify': event.needNotify,
-      'notifications': event.notifications
-          .map((notification) => {
-                'dateTime': notification.dateTime,
-                'id': notification.id,
-              })
-          .toList(),
-    }).then((value) {
-      print("Event Added");
-      fetchEvents();
-    }).catchError((error) {
-      print("Failed to add event: $error");
-    });
-  }
+  // Add the event to Firestore, and store the document reference to get the generated ID
+  return FirebaseFirestore.instance.collection('events').add({
+    // Initially, no event ID since Firestore will generate it
+    'title': event.title,
+    'description': event.details,
+    'date': event.dateTime,
+    'endDate': event.endDateTime,
+    'needEndDate': event.needEndDate,
+    'needNotify': event.needNotify,
+    'notifications': event.notifications
+        .map((notification) => {
+              'dateTime': notification.dateTime,
+              'id': notification.id,
+            })
+        .toList(),
+  }).then((docRef) async {
+    // Firestore generated document ID
+    String generatedId = docRef.id;
+    print("Event Added with ID: $generatedId");
+
+    // Update the event ID locally
+    event.id = generatedId;
+
+    // Optionally, update the event in Firestore with the generated event ID
+    await docRef.update({'id': generatedId});
+
+    // Call fetchEvents to update the local list of events
+    fetchEvents();
+  }).catchError((error) {
+    print("Failed to add event: $error");
+  });
+}
+
 
   // Remove event by document ID instead of title
   Future<void> removeEvent(Event event) async {
