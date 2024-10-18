@@ -75,40 +75,27 @@ class _NotesViewBodyState extends State<NotesViewBody>
           builder: (context, setState) {
             // Use StatefulBuilder to manage the dialog's internal state
             return AlertDialog(
-              backgroundColor: const Color(0xFF1C1C1C),
+              backgroundColor: Colors.white,
+              shadowColor: Colors.purple[400],
               title: const Text('Edit Note',
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 23,
+                  )),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
-                    cursorColor: Colors.blue,
                     controller: _titleController,
-                    style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                       labelText: 'Title',
-                      labelStyle: TextStyle(color: Colors.white70),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue),
-                      ),
                     ),
                   ),
                   TextField(
-                    cursorColor: Colors.blue,
                     controller: _subtitleController,
-                    style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                       labelText: 'Subtitle',
-                      labelStyle: TextStyle(color: Colors.white70),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue),
-                      ),
                     ),
                   ),
                   ListTile(
@@ -117,15 +104,14 @@ class _NotesViewBodyState extends State<NotesViewBody>
                           ? DateFormat('MMM d, y - hh:mm a')
                               .format(selectedDateTime!)
                           : 'Select Date & Time',
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.purple[400]),
                     ),
                     trailing: IconButton(
                       icon:
-                          const Icon(Icons.calendar_today, color: Colors.white),
+                          Icon(Icons.calendar_today, color: Colors.purple[400]),
                       onPressed: () async {
                         await _pickDateTime(context);
-                        setState(
-                            () {}); // Ensure the dialog is rebuilt when the date is changed
+                        setState(() {});
                       },
                     ),
                   ),
@@ -137,7 +123,7 @@ class _NotesViewBodyState extends State<NotesViewBody>
                     Navigator.pop(context);
                   },
                   child: const Text('Cancel',
-                      style: TextStyle(color: Colors.white)),
+                      style: TextStyle(color: Colors.black)),
                 ),
                 TextButton(
                   onPressed: () {
@@ -152,8 +138,8 @@ class _NotesViewBodyState extends State<NotesViewBody>
                     selectedDateTime = null;
                     Navigator.pop(context);
                   },
-                  child: const Text('Update',
-                      style: TextStyle(color: Colors.blue)),
+                  child: Text('Update',
+                      style: TextStyle(color: Colors.purple[400])),
                 ),
               ],
             );
@@ -266,10 +252,12 @@ class _NotesViewBodyState extends State<NotesViewBody>
                               CircleAvatar(
                                 radius:
                                     30, // Reduced radius for a smaller avatar
-                                backgroundColor: Color(0xFFD6BEDA),
+                                backgroundColor: Color(0xFFE0B6E4),
                                 child: Text(
-                                  "${DateFormat('hh:mm a').format((notesProvider.activeNotes[index]['time'] as DateTime) // Ensure it's a DateTime
-                                      )}",
+                                  DateFormat('hh:mm a').format(
+                                      (notesProvider.activeNotes[index]['time']
+                                          as DateTime) // Ensure it's a DateTime
+                                      ),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10, // Reduced font size for time
@@ -281,7 +269,7 @@ class _NotesViewBodyState extends State<NotesViewBody>
                                   margin: const EdgeInsets.symmetric(
                                       vertical: 8, horizontal: 10),
                                   decoration: BoxDecoration(
-                                    color: Color(0xFFC8A2CB),
+                                    color: Color(0xFF9F5EA5),
                                     borderRadius: BorderRadius.circular(8),
                                     boxShadow: [
                                       BoxShadow(

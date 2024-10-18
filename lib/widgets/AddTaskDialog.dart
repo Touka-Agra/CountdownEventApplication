@@ -41,7 +41,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
             pickedTime.hour,
             pickedTime.minute,
           );
-          isDateTimeSelected = true; 
+          isDateTimeSelected = true;
         });
       }
     }
@@ -52,7 +52,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
     void _createNote() {
       if (selectedDateTime == null) {
         setState(() {
-          isDateTimeSelected = false; 
+          isDateTimeSelected = false;
         });
         return;
       }
@@ -65,11 +65,16 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
     }
 
     return AlertDialog(
-      backgroundColor: const Color(0xFF1C1C1C),
+      backgroundColor: Colors.white,
       title: const Text(
         'New Note',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.w700,
+          fontSize: 23,
+        ),
       ),
+      shadowColor: Colors.purple,
       content: Form(
         key: _formKey,
         child: Column(
@@ -83,32 +88,14 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                 }
                 return null;
               },
-              cursorColor: Colors.blue,
-              style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
                 labelText: 'Title',
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue),
-                ),
               ),
             ),
             TextField(
               controller: _subtitleController,
-              cursorColor: Colors.blue,
-              style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
                 labelText: 'Subtitle',
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue),
-                ),
               ),
             ),
             ListTile(
@@ -116,14 +103,14 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                   ? Text(
                       DateFormat('MMM d, y - hh:mm a')
                           .format(selectedDateTime!),
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.purple[400]),
                     )
-                  : const Text(
+                  : Text(
                       'Select Date & Time',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.black),
                     ),
               trailing: IconButton(
-                icon: const Icon(Icons.calendar_today, color: Colors.white),
+                icon: Icon(Icons.calendar_today, color: Colors.purple[400]),
                 onPressed: () => _pickDateTime(context),
               ),
             ),
@@ -146,7 +133,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+          child: const Text('Cancel', style: TextStyle(color: Colors.black)),
         ),
         TextButton(
           onPressed: () {
@@ -161,7 +148,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
               }
             }
           },
-          child: const Text('Create', style: TextStyle(color: Colors.blue)),
+          child: Text('Create', style: TextStyle(color: Colors.purple[400])),
         ),
       ],
     );
