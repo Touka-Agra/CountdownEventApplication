@@ -19,7 +19,10 @@ class NotificationWidget extends StatelessWidget {
       child: Consumer<EventProvider>(
         builder: (context, eventProvider, child) {
           return Opacity(
-            opacity: eventProvider.events[eventIdx].needNotify ? 1.0 : 0.5,
+            opacity: (eventIdx >= 0 && eventIdx < eventProvider.events.length && eventProvider.events[eventIdx].needNotify != null) 
+  ? (eventProvider.events[eventIdx].needNotify ? 1.0 : 0.5)
+  : 0.5,  // Default opacity if invalid index or null
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
