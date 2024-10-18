@@ -82,7 +82,7 @@ class _CalendarAppState extends State<CalendarApp> {
             scaffoldBackgroundColor: Colors.transparent,
             hintColor: Colors.white,
           ),
-          home: SignUpScreen(),
+          home: BottomNavBar(),
         );
       },
     );

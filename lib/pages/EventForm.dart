@@ -16,7 +16,6 @@ class EventForm extends StatefulWidget {
 }
 
 class _EventFormState extends State<EventForm> {
- 
   final _formKey = GlobalKey<FormState>();
 
   Color c = Colors.purple;
@@ -102,9 +101,11 @@ class _EventFormState extends State<EventForm> {
                                 int eventIdx = Provider.of<EventProvider>(
                                             context,
                                             listen: false)
-                                        .events.indexOf(event)
-                                        
-                                    ;
+                                        .events
+                                        .length-1;
+
+                                print(
+                                    "''''${Provider.of<EventProvider>(context, listen: false).events[eventIdx].title}");
 
                                 bool isPassed = Provider.of<EventProvider>(
                                         context,
@@ -126,89 +127,6 @@ class _EventFormState extends State<EventForm> {
                                               eventHistoryUpdate);
                                 }
 
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  builder: (context) => Container(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.35,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black,
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(25.0)),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.purple,
-                                            spreadRadius: 2,
-                                            blurRadius: 5)
-                                      ],
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              const Spacer(),
-                                              const Text(
-                                                "Customize Notifications",
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w800,
-                                                  fontSize: 18,
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          right: 5.0, top: 8.0),
-                                                  child: Align(
-                                                    alignment:
-                                                        Alignment.topRight,
-                                                    child: IconButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      style: ButtonStyle(
-                                                        shape:
-                                                            WidgetStateProperty
-                                                                .all(
-                                                          RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        20),
-                                                          ),
-                                                        ),
-                                                        backgroundColor:
-                                                            WidgetStateProperty
-                                                                .all(Colors
-                                                                    .purple),
-                                                      ),
-                                                      icon: const Icon(
-                                                        Icons.check_circle,
-                                                        color: Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Expanded(
-                                            child: SingleChildScrollView(
-                                              child: NotificationWidget(
-                                                eventIdx: eventIdx,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-
                                 Provider.of<DateTimeProvider>(context,
                                         listen: false)
                                     .restartDate();
@@ -224,7 +142,7 @@ class _EventFormState extends State<EventForm> {
                                 Provider.of<DateTimeProvider>(context,
                                         listen: false)
                                     .restartDate();
-                                    
+
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text(

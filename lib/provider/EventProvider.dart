@@ -132,6 +132,17 @@ class EventProvider extends ChangeNotifier {
   void needNotifyToggle({required int eventIdx}) {
     events[eventIdx].needNotify = !events[eventIdx].needNotify;
     notifyListeners();
+
+    FirebaseFirestore.instance
+        .collection('events')
+        .doc(events[eventIdx].id) 
+        .update({
+      'needNotify': events[eventIdx].needNotify,
+    }).then((_) {
+      print("needEndDate toggled in Firestore");
+    }).catchError((error) {
+      print("Failed to toggle needEndDate: $error");
+    });
   }
 
   // Toggle needEndDate and update Firestore
@@ -141,7 +152,7 @@ class EventProvider extends ChangeNotifier {
 
     FirebaseFirestore.instance
         .collection('events')
-        .doc(events[eventIndex].id) // Use event ID instead of title
+        .doc(events[eventIndex].id)
         .update({
       'needEndDate': events[eventIndex].needEndDate,
     }).then((_) {
