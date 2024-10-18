@@ -1,5 +1,5 @@
 import 'package:countdown_event/pages/EventScreen.dart';
-import 'package:countdown_event/pages/event_viewing_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -72,4 +72,3 @@ class _TasksWidgetState extends State<TasksWidget> {
     );
   }
 }
-//test editing 

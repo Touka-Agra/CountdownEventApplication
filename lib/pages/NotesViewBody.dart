@@ -22,8 +22,8 @@ class _NotesViewBodyState extends State<NotesViewBody>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    final notesProvider = Provider.of<NotesProvider>(context, listen: false);
-    notesProvider.fetchNotes();
+    // final notesProvider = Provider.of<NotesProvider>(context, listen: false);
+    // notesProvider.fetchNotes();
   }
 
   @override

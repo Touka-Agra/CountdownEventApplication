@@ -125,13 +125,13 @@ class EventProvider extends ChangeNotifier {
 
   // Toggle needNotify property
   void needNotifyToggle({required int eventIdx}) {
-    events[eventIdx].needNotify = !events[eventIdx].needNotify!;
+    events[eventIdx].needNotify = !events[eventIdx].needNotify;
     notifyListeners();
   }
 
   // Toggle needEndDate and update Firestore
   void toggleNeedEndDate(int eventIndex) {
-    events[eventIndex].needEndDate = !events[eventIndex].needEndDate!;
+    events[eventIndex].needEndDate = !events[eventIndex].needEndDate;
     notifyListeners();
 
     FirebaseFirestore.instance

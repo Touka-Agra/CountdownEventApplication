@@ -12,6 +12,8 @@ class CalendarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final events = Provider.of<EventProvider>(context).events;
+     Provider.of<EventProvider>(context).fetchEvents();
+    
 
     return SfCalendar(
         view: CalendarView.month,
