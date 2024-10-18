@@ -170,19 +170,18 @@ class EventProvider extends ChangeNotifier {
       events.where((event) => event.dateTime.day == _selectedDate.day).toList();
 
   // Edit event details
-  void editEvent(Event newEvent, {required Event oldEvent}) {
+  void editEvent({required Event newEvent, required Event oldEvent}) {
     final index = events.indexWhere((event) => event == oldEvent);
     if (index != -1) {
       events[index] = newEvent;
       notifyListeners();
 
-      FirebaseFirestore.instance
-          .collection('events')
-          .doc(oldEvent.id) // Use event ID instead of title
-          .update({
+      FirebaseFirestore.instance.collection('events').doc(oldEvent.id).update({
         'title': newEvent.title,
         'description': newEvent.details,
         'date': newEvent.dateTime.toIso8601String(),
+        'needEndDate': newEvent.needEndDate,
+        'endDate': newEvent.endDateTime?.toIso8601String()
       }).then((_) {
         print("Event updated in Firestore");
       }).catchError((error) {
@@ -259,10 +258,9 @@ class EventProvider extends ChangeNotifier {
     events[eventIdx].eventHistory = eventHistoryUpdate;
     Event event = events[eventIdx];
 
-    FirebaseFirestore.instance
-        .collection('events')
-        .doc(events[eventIdx].id) // Use event ID instead of title
-        .update({
+    print(event.id);
+
+    FirebaseFirestore.instance.collection('events').doc(event.id).update({
       'inHistory': event.eventHistory.inHistory,
       'isPassed': event.eventHistory.isPassed,
       'reason': event.eventHistory.reason,
@@ -278,7 +276,7 @@ class EventProvider extends ChangeNotifier {
   bool checkDateTime(int eventIdx) {
     Event event = events[eventIdx];
     DateTime passedDateTime = event.dateTime;
-    if (event.needEndDate) passedDateTime = event.endDateTime!;
+    if (event.needEndDate) passedDateTime = event.endDateTime??event.dateTime;
 
     if (passedDateTime.isBefore(DateTime.now())) {
       return true;

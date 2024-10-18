@@ -144,7 +144,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                     context: context,
                                     isScrollControlled: true,
                                     builder: (context) =>
-                                        EditEventSheet(eventIdx: eventIdx));
+                                        EditEventSheet(eventIdx: eventIdx, isRestore: false,));
                               },
                               icon: const Icon(Icons.edit_rounded,
                                   size: 20, color: Colors.white)),

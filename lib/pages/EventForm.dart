@@ -16,11 +16,7 @@ class EventForm extends StatefulWidget {
 }
 
 class _EventFormState extends State<EventForm> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
+ 
   final _formKey = GlobalKey<FormState>();
 
   Color c = Colors.purple;
@@ -106,9 +102,9 @@ class _EventFormState extends State<EventForm> {
                                 int eventIdx = Provider.of<EventProvider>(
                                             context,
                                             listen: false)
-                                        .events
-                                        .length -
-                                    1;
+                                        .events.indexOf(event)
+                                        
+                                    ;
 
                                 bool isPassed = Provider.of<EventProvider>(
                                         context,

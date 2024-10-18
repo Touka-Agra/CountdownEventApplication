@@ -1,4 +1,3 @@
-import 'package:countdown_event/pages/SignUpScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -84,7 +83,7 @@ Widget build(BuildContext context) {
           scaffoldBackgroundColor: Colors.transparent,
           hintColor: Colors.white,
         ),
-        home:  SignUpScreen(),
+        home: const BottomNavBar(),
       );
     },
   );

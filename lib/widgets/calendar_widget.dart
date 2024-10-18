@@ -9,7 +9,7 @@ import '../models/event_data_source.dart';
 import 'tasks_widget.dart';
 
 class CalendarWidget extends StatelessWidget {
-  CalendarWidget({super.key});
+   CalendarWidget({super.key});
   @override
   Widget build(BuildContext context) {
     final events = Provider.of<EventProvider>(context).events;
@@ -27,7 +27,7 @@ class CalendarWidget extends StatelessWidget {
           provider.setDate(details.date!);
           showModalBottomSheet(
             context: context,
-            builder: (context) => TasksWidget(),
+            builder: (context) => const TasksWidget(),
           );
         });
   }

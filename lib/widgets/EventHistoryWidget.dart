@@ -24,10 +24,10 @@ class EventHistoryWidget extends StatelessWidget {
 
     double h = MediaQuery.of(context).size.height;
 
-    return Consumer<EventProvider>(builder: (context, eventProvider, child) {
-      return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Dismissible(
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Consumer<EventProvider>(builder: (context, eventProvider, child) {
+        return Dismissible(
           key: Key(event.id),
           direction: DismissDirection.endToStart,
           background: Container(
@@ -80,7 +80,7 @@ class EventHistoryWidget extends StatelessWidget {
                     context: context,
                     isScrollControlled: true,
                     builder: (context) => EditEventSheet(
-                          eventIdx: eventIdx,
+                          eventIdx: eventIdx, isRestore: true,
                         ));
               } else {
                 EventHistory eventHistoryUpdate = EventHistory(
@@ -172,8 +172,8 @@ class EventHistoryWidget extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      }),
+    );
   }
 }

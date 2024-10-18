@@ -45,7 +45,6 @@ class _EventWidgetState extends State<EventWidget> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     Event event = Provider.of<EventProvider>(context, listen: false)
@@ -147,17 +146,18 @@ class _EventWidgetState extends State<EventWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(event.title,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  shadows: [
-                                    Shadow(
-                                        color: Colors.white54,
-                                        offset: Offset(0.5, 0.5))
-                                  ]),
-                                 ),
+                          Text(
+                            event.title,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                shadows: [
+                                  Shadow(
+                                      color: Colors.white54,
+                                      offset: Offset(0.5, 0.5))
+                                ]),
+                          ),
                           const SizedBox(height: 5),
                           Row(
                             children: [
@@ -222,77 +222,80 @@ class _EventWidgetState extends State<EventWidget> {
                         ],
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Flexible(
-                        flex: 2,
-                        child: Center(
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: Container(
-                                    height: 100,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10)),
-                                    child: const VerticalDivider(
-                                        color: Colors.black, thickness: 2)),
-                              ),
-                              Consumer<EventProvider>(
-                                builder: (context, eventProvider, child) {
-                                  DateTime? countdownDateTime =
-                                      !eventProvider.events[widget.eventIdx].isEnd
-                                          ? event.dateTime
-                                          : event.endDateTime;
-                                                    
-                                  if (eventProvider.checkDateTime(widget.eventIdx)) {
-                                    EventHistory eventHistoryUpdate = EventHistory(
-                                        inHistory: true,
-                                        isPassed: true,
-                                        reason: "Passed");
-                                                    
-                                    Provider.of<EventProvider>(context, listen: false)
-                                        .updateHistoryState(
-                                            eventIdx: widget.eventIdx,
-                                            eventHistoryUpdate: eventHistoryUpdate);
-                                                    
-                                    return const Column(
-                                      children: [
-                                        Text("0",
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 25)),
-                                        Text("Passed",
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12)),
-                                      ],
-                                    );
-                                  }
-                                                    
-                                  List<String> remainingTime =
-                                      getBiggestNonZeroUnit(countdownDateTime!);
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                    Flexible(
+                      flex: 2,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Container(
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: const VerticalDivider(
+                                      color: Colors.black, thickness: 2)),
+                            ),
+                            Consumer<EventProvider>(
+                              builder: (context, eventProvider, child) {
+                                DateTime? countdownDateTime =
+                                    !eventProvider.events[widget.eventIdx].isEnd
+                                        ? event.dateTime
+                                        : event.endDateTime;
+
+                                if (eventProvider
+                                    .checkDateTime(widget.eventIdx)) {
+                                  EventHistory eventHistoryUpdate =
+                                      EventHistory(
+                                          inHistory: true,
+                                          isPassed: true,
+                                          reason: "Passed");
+
+                                  Provider.of<EventProvider>(context,
+                                          listen: false)
+                                      .updateHistoryState(
+                                          eventIdx: widget.eventIdx,
+                                          eventHistoryUpdate:
+                                              eventHistoryUpdate);
+
+                                  return const Column(
                                     children: [
-                                      Text(remainingTime[0],
-                                          style: const TextStyle(
+                                      Text("0",
+                                          style: TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
                                               fontSize: 25)),
-                                      Text(remainingTime[1],
-                                          style: const TextStyle(
+                                      Text("Passed",
+                                          style: TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
                                               fontSize: 12)),
                                     ],
                                   );
-                                },
-                              ),
-                            ],
-                          ),
+                                }
+
+                                List<String> remainingTime =
+                                    getBiggestNonZeroUnit(countdownDateTime!);
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(remainingTime[0],
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 25)),
+                                    Text(remainingTime[1],
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12)),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     ),

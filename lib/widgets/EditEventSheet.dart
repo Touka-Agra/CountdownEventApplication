@@ -11,7 +11,8 @@ import '../widgets/DateTimeSetterWidget.dart';
 // ignore: must_be_immutable
 class EditEventSheet extends StatefulWidget {
   int eventIdx;
-  EditEventSheet({super.key, required this.eventIdx});
+  bool isRestore;
+  EditEventSheet({super.key, required this.eventIdx, required this.isRestore});
 
   @override
   State<EditEventSheet> createState() => _EditEventSheetState();
@@ -21,34 +22,46 @@ class _EditEventSheetState extends State<EditEventSheet> {
   final _formKey = GlobalKey<FormState>();
   Color c = Colors.purple;
 
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
+
+  late bool needEndDate;
+
+  late String typingTitle;
+
   @override
-  Widget build(BuildContext context) {
-    int eventIdx = widget.eventIdx;
-    Event event =
-        Provider.of<EventProvider>(context, listen: false).events[eventIdx];
+  void initState() {
+    Event event = Provider.of<EventProvider>(context, listen: false)
+        .events[widget.eventIdx];
 
-    String typingTitle = event.title;
+    typingTitle = event.title;
 
-    final TextEditingController _titleController =
-        TextEditingController(text: event.title);
-    final TextEditingController _descriptionController =
-        TextEditingController(text: event.details);
+    _titleController = TextEditingController(text: event.title);
+    _descriptionController = TextEditingController(text: event.details);
 
     Provider.of<DateTimeProvider>(context, listen: false).dateTime =
         event.dateTime;
 
-    // if (event.needEndDate) {
-    //   Provider.of<DateTimeProvider>(context, listen: false).endDateTime =
-    //       event.endDateTime!??DateT;
-    // }
+    needEndDate = event.needEndDate;
 
+    if (event.needEndDate) {
+      Provider.of<DateTimeProvider>(context, listen: false).endDateTime =
+          event.endDateTime!;
+    }
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Event oldEvent = Provider.of<EventProvider>(context, listen: false)
+        .events[widget.eventIdx];
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
         color: Colors.black,
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
         boxShadow: [
-          BoxShadow(color: Colors.purple, spreadRadius: 2, blurRadius: 5),
+          BoxShadow(color: Colors.purple, spreadRadius: 2, blurRadius: 5)
         ],
       ),
       child: Padding(
@@ -60,9 +73,9 @@ class _EditEventSheetState extends State<EditEventSheet> {
               Row(
                 children: [
                   const Spacer(),
-                  const Text(
-                    "Restore Passed Date Event",
-                    style: TextStyle(
+                  Text(
+                    widget.isRestore ? "Restore Expired Event" : "Edit Event",
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
                       fontSize: 18,
@@ -74,7 +87,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
                       child: Align(
                         alignment: Alignment.topRight,
                         child: IconButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               DateTime dateTime = Provider.of<DateTimeProvider>(
                                       context,
@@ -82,11 +95,11 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                   .dateTime;
 
                               Event newEvent = Event(
-                                id: '',
+                                id: oldEvent.id,
                                 title: _titleController.text,
                                 details: _descriptionController.text,
                                 dateTime: dateTime,
-                                needEndDate: event.needEndDate,
+                                needEndDate: needEndDate,
                                 needNotify: true,
                                 notifications: [],
                                 eventHistory: EventHistory(
@@ -95,8 +108,8 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                     inHistory: false),
                               );
 
-                              if (event.needEndDate) {
-                                event.endDateTime =
+                              if (needEndDate) {
+                                newEvent.endDateTime =
                                     Provider.of<DateTimeProvider>(context,
                                             listen: false)
                                         .endDateTime;
@@ -105,23 +118,18 @@ class _EditEventSheetState extends State<EditEventSheet> {
                               if (Provider.of<DateTimeProvider>(context,
                                           listen: false)
                                       .isValidEndDate ||
-                                  !event.needEndDate) {
+                                  !needEndDate) {
                                 Navigator.pop(context);
+
                                 Provider.of<EventProvider>(context,
                                         listen: false)
-                                    .editEvent(newEvent, oldEvent: event);
-
-                                int eventIdx = Provider.of<EventProvider>(
-                                            context,
-                                            listen: false)
-                                        .events
-                                        .length -
-                                    1;
+                                    .editEvent(
+                                        oldEvent: oldEvent, newEvent: newEvent);
 
                                 bool isPassed = Provider.of<EventProvider>(
                                         context,
                                         listen: false)
-                                    .checkDateTime(eventIdx);
+                                    .checkDateTime(widget.eventIdx);
 
                                 if (isPassed) {
                                   EventHistory eventHistoryUpdate =
@@ -133,10 +141,28 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                   Provider.of<EventProvider>(context,
                                           listen: false)
                                       .updateHistoryState(
-                                          eventIdx: eventIdx,
+                                          eventIdx: widget.eventIdx,
                                           eventHistoryUpdate:
                                               eventHistoryUpdate);
                                 }
+
+                                else{
+                                  EventHistory eventHistoryUpdate =
+                                      EventHistory(
+                                          inHistory: false,
+                                          isPassed: isPassed,
+                                          reason: "");
+
+                                  Provider.of<EventProvider>(context,
+                                          listen: false)
+                                      .updateHistoryState(
+                                          eventIdx: widget.eventIdx,
+                                          eventHistoryUpdate:
+                                              eventHistoryUpdate);
+                                }
+                              
+
+
 
                                 Provider.of<DateTimeProvider>(context,
                                         listen: false)
@@ -145,21 +171,32 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content: Text(
-                                          'Event "${_titleController.text}" restored successfully')),
+                                          'Event "${_titleController.text}" Edited/Restored successfully')),
                                 );
                               } else {
                                 Navigator.pop(context);
+
                                 Provider.of<DateTimeProvider>(context,
                                         listen: false)
                                     .restartDate();
+
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text(
-                                          'Unfortunately, Event is not restored')),
+                                          'Unfortunately, Event is not added')),
                                 );
                               }
                             }
                           },
+                          style: ButtonStyle(
+                            shape: WidgetStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            backgroundColor:
+                                WidgetStateProperty.all(Colors.purple),
+                          ),
                           icon: const Icon(
                             Icons.check_circle,
                             color: Colors.white,
@@ -227,11 +264,11 @@ class _EditEventSheetState extends State<EditEventSheet> {
                         child: Consumer<EventProvider>(
                             builder: (context, eventProvider, child) {
                           return Opacity(
-                            opacity: event.needEndDate ? 1.0 : 0.5,
+                            opacity: needEndDate ? 1.0 : 0.5,
                             child: Column(
                               children: [
                                 CheckboxListTile(
-                                  value: event.needEndDate,
+                                  value: needEndDate,
                                   checkColor: c,
                                   title: const Text(
                                     "Set End Date",
@@ -243,21 +280,13 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                   ),
                                   onChanged: (value) {
                                     setState(() {
-                                      event.needEndDate = value!;
-                                       if(Provider.of<DateTimeProvider>(context,
-                                                  listen: false)
-                                              .endDateTime==null)
-                                      {Provider.of<DateTimeProvider>(context,
-                                                  listen: false)
-                                              .endDateTime =
-                                          Provider.of<DateTimeProvider>(context,
-                                                  listen: false)
-                                              .dateTime;}
+                                      needEndDate = value!;
+                                      eventProvider.setNeedEndDate(needEndDate);
                                     });
                                   },
                                 ),
                                 IgnorePointer(
-                                  ignoring: !event.needEndDate,
+                                  ignoring: !needEndDate,
                                   child: DateTimeSetterWidget(
                                     isStart: false,
                                   ),
