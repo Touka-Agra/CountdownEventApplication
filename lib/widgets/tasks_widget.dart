@@ -1,15 +1,13 @@
-import 'package:countdown_event/pages/EventScreen.dart';
+import 'package:countdown_event/pages/EventDetailsScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
-
 import '../models/event_data_source.dart';
-
 import '../provider/EventProvider.dart';
 
 class TasksWidget extends StatefulWidget {
-  const TasksWidget({super.key});
+  const TasksWidget({Key? key}) : super(key: key);
 
   @override
   State<TasksWidget> createState() => _TasksWidgetState();
@@ -18,8 +16,10 @@ class TasksWidget extends StatefulWidget {
 class _TasksWidgetState extends State<TasksWidget> {
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<EventProvider>(context, listen: false);
+    final provider = Provider.of<EventProvider>(context);
     final selectedEvents = provider.eventsOfSelectedDate;
+
+    // Show message if there are no events
     if (selectedEvents.isEmpty) {
       return const Center(
         child: Text(
@@ -30,33 +30,43 @@ class _TasksWidgetState extends State<TasksWidget> {
     }
 
     return SfCalendarTheme(
-        data: const SfCalendarThemeData(
-            timeTextStyle: TextStyle(fontSize: 16, color: Colors.white)),
-        child: SfCalendar(
-          view: CalendarView.timelineDay,
-          dataSource: EventDataSource(provider.events),
-          headerHeight: 0,
-          todayHighlightColor: Colors.white,
-          initialDisplayDate: provider.selectedDate,
-          appointmentBuilder: appointmentBuilder,
-          selectionDecoration: BoxDecoration(
-              color: const Color.fromARGB(255, 56, 9, 149).withOpacity(0.3)),
-          onTap: (details) {
-            if (details.appointments == null) return;
-            //final event = details.appointments!.first;
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => EventScreen()));
-          },
-        ));
+      data: const SfCalendarThemeData(
+        timeTextStyle: TextStyle(fontSize: 16, color: Colors.white),
+      ),
+      child: SfCalendar(
+        view: CalendarView.timelineDay,
+        dataSource: EventDataSource(selectedEvents), 
+        headerHeight: 0,
+        todayHighlightColor: Colors.white,
+        initialDisplayDate: provider.selectedDate,
+        appointmentBuilder: appointmentBuilder,
+        selectionDecoration: BoxDecoration(
+          color: const Color.fromARGB(255, 56, 9, 149).withOpacity(0.3),
+        ),
+        onTap: (details) {
+          if (details.appointments != null && details.appointments!.isNotEmpty) {
+            // Get the first event and pass it to EventDetailsScreen
+            final event = details.appointments!.first;
+            int eventId = int.tryParse(event.id) ?? 0; 
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                
+                builder: (context) => EventDetailsScreen(eventIdx: eventId), // Pass the actual event ID or any identifier
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 
-  Widget appointmentBuilder(
-      BuildContext context, CalendarAppointmentDetails details) {
+  Widget appointmentBuilder(BuildContext context, CalendarAppointmentDetails details) {
     final event = details.appointments.first;
     return Container(
       decoration: BoxDecoration(
-          color: event.backgroundColor.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(12)),
+        color: event.backgroundColor.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
       width: details.bounds.width,
       height: details.bounds.height,
       child: Center(
@@ -65,7 +75,10 @@ class _TasksWidgetState extends State<TasksWidget> {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-              color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
