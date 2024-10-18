@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../models/event.dart';
 import '../provider/EventProvider.dart';
 
+// ignore: must_be_immutable
 class AddNotificationDialog extends StatefulWidget {
   late DateTime eventDate;
   int eventIdx;

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../provider/DateTimeProvider.dart';
 
+// ignore: must_be_immutable
 class DateTimeSetterWidget extends StatelessWidget {
   late bool isStart;
   DateTimeSetterWidget({super.key, required this.isStart});

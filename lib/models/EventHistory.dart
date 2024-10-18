@@ -1,4 +1,3 @@
-import 'event.dart';
 
 class EventHistory {
   bool inHistory;

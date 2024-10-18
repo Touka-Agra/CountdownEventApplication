@@ -7,6 +7,8 @@ import '../provider/DateTimeProvider.dart';
 import '../provider/EventProvider.dart';
 import '../widgets/DateTimeSetterWidget.dart';
 
+// EditEventSheet class
+// ignore: must_be_immutable
 class EditEventSheet extends StatefulWidget {
   int eventIdx;
   EditEventSheet({super.key, required this.eventIdx});
@@ -16,23 +18,8 @@ class EditEventSheet extends StatefulWidget {
 }
 
 class _EditEventSheetState extends State<EditEventSheet> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   final _formKey = GlobalKey<FormState>();
-
   Color c = Colors.purple;
-
-  
-
-  // @override
-  // void dispose() {
-  //   _titleController.dispose();
-  //   _descriptionController.dispose();
-  //   super.dispose();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +27,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
     Event event =
         Provider.of<EventProvider>(context, listen: false).events[eventIdx];
 
-        String typingTitle = event.title;
-  bool needEndDate = event.needEndDate;
+    String typingTitle = event.title;
 
     final TextEditingController _titleController =
         TextEditingController(text: event.title);
@@ -51,10 +37,10 @@ class _EditEventSheetState extends State<EditEventSheet> {
     Provider.of<DateTimeProvider>(context, listen: false).dateTime =
         event.dateTime;
 
-        if(event.needEndDate){
-           Provider.of<DateTimeProvider>(context, listen: false).endDateTime =
-        event.endDateTime!;
-        }
+    // if (event.needEndDate) {
+    //   Provider.of<DateTimeProvider>(context, listen: false).endDateTime =
+    //       event.endDateTime!??DateT;
+    // }
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
@@ -62,7 +48,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
         color: Colors.black,
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
         boxShadow: [
-          BoxShadow(color: Colors.purple, spreadRadius: 2, blurRadius: 5)
+          BoxShadow(color: Colors.purple, spreadRadius: 2, blurRadius: 5),
         ],
       ),
       child: Padding(
@@ -100,7 +86,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                 title: _titleController.text,
                                 details: _descriptionController.text,
                                 dateTime: dateTime,
-                                needEndDate: needEndDate,
+                                needEndDate: event.needEndDate,
                                 needNotify: true,
                                 notifications: [],
                                 eventHistory: EventHistory(
@@ -109,7 +95,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                     inHistory: false),
                               );
 
-                              if (needEndDate) {
+                              if (event.needEndDate) {
                                 event.endDateTime =
                                     Provider.of<DateTimeProvider>(context,
                                             listen: false)
@@ -119,7 +105,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
                               if (Provider.of<DateTimeProvider>(context,
                                           listen: false)
                                       .isValidEndDate ||
-                                  !needEndDate) {
+                                  !event.needEndDate) {
                                 Navigator.pop(context);
                                 Provider.of<EventProvider>(context,
                                         listen: false)
@@ -174,15 +160,6 @@ class _EditEventSheetState extends State<EditEventSheet> {
                               }
                             }
                           },
-                          style: ButtonStyle(
-                            shape: WidgetStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                            backgroundColor:
-                                WidgetStateProperty.all(Colors.purple),
-                          ),
                           icon: const Icon(
                             Icons.check_circle,
                             color: Colors.white,
@@ -250,11 +227,11 @@ class _EditEventSheetState extends State<EditEventSheet> {
                         child: Consumer<EventProvider>(
                             builder: (context, eventProvider, child) {
                           return Opacity(
-                            opacity: needEndDate ? 1.0 : 0.5,
+                            opacity: event.needEndDate ? 1.0 : 0.5,
                             child: Column(
                               children: [
                                 CheckboxListTile(
-                                  value: needEndDate,
+                                  value: event.needEndDate,
                                   checkColor: c,
                                   title: const Text(
                                     "Set End Date",
@@ -266,13 +243,21 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                   ),
                                   onChanged: (value) {
                                     setState(() {
-                                      needEndDate = value!;
-                                      eventProvider.setNeedEndDate(needEndDate);
+                                      event.needEndDate = value!;
+                                       if(Provider.of<DateTimeProvider>(context,
+                                                  listen: false)
+                                              .endDateTime==null)
+                                      {Provider.of<DateTimeProvider>(context,
+                                                  listen: false)
+                                              .endDateTime =
+                                          Provider.of<DateTimeProvider>(context,
+                                                  listen: false)
+                                              .dateTime;}
                                     });
                                   },
                                 ),
                                 IgnorePointer(
-                                  ignoring: !needEndDate,
+                                  ignoring: !event.needEndDate,
                                   child: DateTimeSetterWidget(
                                     isStart: false,
                                   ),
@@ -322,15 +307,4 @@ class _EditEventSheetState extends State<EditEventSheet> {
       ),
     );
   }
-}
-
-Widget _buildTitle(String title) {
-  return Text(
-    title,
-    style: TextStyle(
-      fontWeight: FontWeight.bold,
-      color: Colors.grey[400],
-      fontSize: 10,
-    ),
-  );
 }

@@ -32,13 +32,6 @@ class _EventFormState extends State<EventForm> {
   bool needEndDate = false;
 
   @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
@@ -72,7 +65,7 @@ class _EventFormState extends State<EventForm> {
                       child: Align(
                         alignment: Alignment.topRight,
                         child: IconButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               DateTime dateTime = Provider.of<DateTimeProvider>(
                                       context,
@@ -105,6 +98,7 @@ class _EventFormState extends State<EventForm> {
                                       .isValidEndDate ||
                                   !needEndDate) {
                                 Navigator.pop(context);
+
                                 Provider.of<EventProvider>(context,
                                         listen: false)
                                     .addEvent(event);
@@ -206,7 +200,6 @@ class _EventFormState extends State<EventForm> {
                                               ),
                                             ],
                                           ),
-                                         
                                           Expanded(
                                             child: SingleChildScrollView(
                                               child: NotificationWidget(
@@ -231,6 +224,11 @@ class _EventFormState extends State<EventForm> {
                                 );
                               } else {
                                 Navigator.pop(context);
+
+                                Provider.of<DateTimeProvider>(context,
+                                        listen: false)
+                                    .restartDate();
+                                    
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text(

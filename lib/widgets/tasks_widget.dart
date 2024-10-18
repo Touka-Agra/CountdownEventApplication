@@ -1,5 +1,4 @@
 import 'package:countdown_event/pages/EventScreen.dart';
-import 'package:countdown_event/pages/event_viewing_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -44,7 +43,7 @@ class _TasksWidgetState extends State<TasksWidget> {
               color: const Color.fromARGB(255, 56, 9, 149).withOpacity(0.3)),
           onTap: (details) {
             if (details.appointments == null) return;
-            final event = details.appointments!.first;
+            //final event = details.appointments!.first;
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => EventScreen()));
           },

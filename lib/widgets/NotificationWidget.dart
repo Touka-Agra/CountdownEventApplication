@@ -7,6 +7,7 @@ import '../models/NotificationId.dart';
 import '../models/event.dart';
 import 'AddNotification_dialog.dart';
 
+// ignore: must_be_immutable
 class NotificationWidget extends StatelessWidget {
   int eventIdx;
   NotificationWidget({super.key, required this.eventIdx});

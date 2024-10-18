@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:countdown_event/models/EventHistory.dart';
 
 import 'NotificationId.dart';

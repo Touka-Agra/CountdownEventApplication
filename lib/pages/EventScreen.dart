@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../Customs/MyAppBar.dart';
+import '../models/event.dart';
 import '../provider/EventProvider.dart';
 import '../widgets/EventHistoryWidget.dart';
 import '../widgets/EventWidget.dart';
@@ -24,8 +25,8 @@ class _EventScreenState extends State<EventScreen>
   void initState() {
     super.initState();
 
-     Provider.of<EventProvider>(context, listen: false).fetchEvents();
-     print('Calling fetchEvents...');
+    Provider.of<EventProvider>(context, listen: false).fetchEvents();
+    print('Calling fetchEvents...');
   }
 
   @override
@@ -50,7 +51,10 @@ class _EventScreenState extends State<EventScreen>
             padding: const EdgeInsets.all(8.0),
             child: Consumer<EventProvider>(
               builder: (context, eventProvider, child) {
-                if (eventProvider.events.isEmpty) {
+                final events = eventProvider.events
+                    .where((event) => !event.eventHistory.inHistory)
+                    .toList();
+                if (events.isEmpty) {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -83,9 +87,11 @@ class _EventScreenState extends State<EventScreen>
                 }
 
                 return ListView.builder(
-                  itemCount: eventProvider.events.length,
+                  itemCount: events.length,
                   itemBuilder: (context, index) {
-                    return EventWidget(eventIdx: index);
+                    Event upCommingEvent = events[index];
+                    int eventIdx = eventProvider.events.indexOf(upCommingEvent);
+                    return EventWidget(eventIdx: eventIdx);
                   },
                 );
               },
@@ -97,7 +103,6 @@ class _EventScreenState extends State<EventScreen>
             padding: const EdgeInsets.all(8.0),
             child: Consumer<EventProvider>(
               builder: (context, eventProvider, child) {
-              
                 final pastEvents = eventProvider.events
                     .where((event) => event.eventHistory.inHistory)
                     .toList();
@@ -114,25 +119,20 @@ class _EventScreenState extends State<EventScreen>
                   );
                 }
 
-                return GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 1.2,
-                            crossAxisSpacing: 12.0,
-                            mainAxisSpacing: 10.0,
-                          ),
-                          shrinkWrap: true,
-                         
-                          itemCount: pastEvents.length,
-                          itemBuilder: (context, index) {
-                            return EventHistoryWidget(eventIdx: index,);
-                          });
+                return ListView.builder(
+                    itemCount: pastEvents.length,
+                    itemBuilder: (context, index) {
+                      Event pastEvent = pastEvents[index];
+                      int eventIdx = eventProvider.events.indexOf(pastEvent);
+                      return EventHistoryWidget(
+                        eventIdx: eventIdx,
+                      );
+                    });
               },
             ),
           ),
         ],
       ),
     );
-}
+  }
 }
