@@ -1,4 +1,5 @@
 import 'package:countdown_event/provider/EventProvider.dart';
+import 'package:countdown_event/provider/NotesProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -12,8 +13,9 @@ class CalendarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final events = Provider.of<EventProvider>(context).events;
-     Provider.of<EventProvider>(context).fetchEvents();
     
+    //  Provider.of<EventProvider>(context).fetchEvents();
+    //  Provider.of<NotesProvider>(context).fetchNotes();
 
     return SfCalendar(
         view: CalendarView.month,
