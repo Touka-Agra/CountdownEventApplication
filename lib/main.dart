@@ -11,27 +11,25 @@ import 'provider/NotesProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
- 
-    await Firebase.initializeApp();
-    await AwesomeNotifications().initialize(
-      null,
-      [
-        NotificationChannel(
-          channelKey: 'countdown_channel',
-          channelName: 'Countdown Notification',
-          channelDescription: 'Notification channel for countdown tests',
-          defaultColor: Colors.purple,
-          ledColor: Colors.white,
-          importance: NotificationImportance.Max,
-          playSound: true,
-          enableVibration: true,
-          vibrationPattern: highVibrationPattern,
-        ),
-      ],
-      debug: true,
-    );
-  
+
+  await Firebase.initializeApp();
+  await AwesomeNotifications().initialize(
+    null,
+    [
+      NotificationChannel(
+        channelKey: 'countdown_channel',
+        channelName: 'Countdown Notification',
+        channelDescription: 'Notification channel for countdown tests',
+        defaultColor: Colors.purple,
+        ledColor: Colors.white,
+        importance: NotificationImportance.Max,
+        playSound: true,
+        enableVibration: true,
+        vibrationPattern: highVibrationPattern,
+      ),
+    ],
+    debug: true,
+  );
 
   runApp(
     MultiProvider(
@@ -66,28 +64,27 @@ class _CalendarAppState extends State<CalendarApp> {
     }
   }
 
- @override
-Widget build(BuildContext context) {
-  return FutureBuilder(
-    future: Provider.of<EventProvider>(context, listen: false).fetchEvents(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (snapshot.hasError) {
-        return Center(child: Text('Error: ${snapshot.error}'));
-      }
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        themeMode: ThemeMode.dark,
-        darkTheme: ThemeData.dark().copyWith(
-          scaffoldBackgroundColor: Colors.transparent,
-          hintColor: Colors.white,
-        ),
-        home:  SignUpScreen(),
-      );
-    },
-  );
-}
-
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: Provider.of<EventProvider>(context, listen: false).fetchEvents(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          themeMode: ThemeMode.dark,
+          darkTheme: ThemeData.dark().copyWith(
+            scaffoldBackgroundColor: Colors.transparent,
+            hintColor: Colors.white,
+          ),
+          home: SignUpScreen(),
+        );
+      },
+    );
+  }
 }

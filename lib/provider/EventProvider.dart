@@ -276,13 +276,20 @@ class EventProvider extends ChangeNotifier {
   }
 
   bool checkDateTime(int eventIdx) {
+    // Check if eventIdx is within the valid range
+    if (eventIdx < 0 || eventIdx >= events.length) {
+      // Return false or handle the error case appropriately
+      return false;
+    }
+
+    // Now it's safe to access the event
     Event event = events[eventIdx];
     DateTime passedDateTime = event.dateTime;
+
+    // If event requires an end date, use it instead of start date
     if (event.needEndDate) passedDateTime = event.endDateTime!;
 
-    if (passedDateTime.isBefore(DateTime.now())) {
-      return true;
-    }
-    return false;
+    // Check if the date has passed
+    return passedDateTime.isBefore(DateTime.now());
   }
 }
