@@ -33,7 +33,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     List<Widget> screens = [
       const EventScreen(),
       const AddWidget(),
-      const NotesViewBody(),
+      NotesViewBody(),
     ];
     return Scaffold(
       body: screens[changeIdx],
