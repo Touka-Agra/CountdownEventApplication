@@ -28,6 +28,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
   late bool needEndDate;
 
   late String typingTitle;
+  late Color selectedColor;
 
   @override
   void initState() {
@@ -35,6 +36,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
         .events[widget.eventIdx];
 
     typingTitle = event.title;
+    selectedColor = event.backgroundColor;
 
     _titleController = TextEditingController(text: event.title);
     _descriptionController = TextEditingController(text: event.details);
@@ -51,6 +53,15 @@ class _EditEventSheetState extends State<EditEventSheet> {
     super.initState();
   }
 
+  final List<Color> availableColors = [
+    const Color(0xFFC4D4B1),
+    const Color(0xFFF1B598),
+    const Color(0xFFEFD9AA),
+    const Color(0xFFFFB5B5),
+    const Color(0xFFD7C2D8),
+    const Color(0xFFB3D9E1),
+  ];
+
   @override
   Widget build(BuildContext context) {
     Event oldEvent = Provider.of<EventProvider>(context, listen: false)
@@ -58,7 +69,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
-        color: Colors.black,
+        color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
         boxShadow: [
           BoxShadow(color: Colors.purple, spreadRadius: 2, blurRadius: 5)
@@ -76,9 +87,9 @@ class _EditEventSheetState extends State<EditEventSheet> {
                   Text(
                     widget.isRestore ? "Restore Expired Event" : "Edit Event",
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontWeight: FontWeight.w800,
-                      fontSize: 18,
+                      fontSize: 25,
                     ),
                   ),
                   Expanded(
@@ -101,6 +112,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                 dateTime: dateTime,
                                 needEndDate: needEndDate,
                                 needNotify: true,
+                                backgroundColor: selectedColor,
                                 notifications: [],
                                 eventHistory: EventHistory(
                                     isPassed: false,
@@ -144,9 +156,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                           eventIdx: widget.eventIdx,
                                           eventHistoryUpdate:
                                               eventHistoryUpdate);
-                                }
-
-                                else{
+                                } else {
                                   EventHistory eventHistoryUpdate =
                                       EventHistory(
                                           inHistory: false,
@@ -160,9 +170,6 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                           eventHistoryUpdate:
                                               eventHistoryUpdate);
                                 }
-                              
-
-
 
                                 Provider.of<DateTimeProvider>(context,
                                         listen: false)
@@ -188,18 +195,10 @@ class _EditEventSheetState extends State<EditEventSheet> {
                               }
                             }
                           },
-                          style: ButtonStyle(
-                            shape: WidgetStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                            backgroundColor:
-                                WidgetStateProperty.all(Colors.purple),
-                          ),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.check_circle,
-                            color: Colors.white,
+                            color: Colors.purple[400],
+                            size: 30,
                           ),
                         ),
                       ),
@@ -213,9 +212,53 @@ class _EditEventSheetState extends State<EditEventSheet> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Select Background Color",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: availableColors.map((color) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedColor = color;
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 30,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: color,
+                                      border: Border.all(
+                                        color: selectedColor == color
+                                            ? Colors.black
+                                            : Colors.transparent,
+                                        width: 3,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey[700],
+                          color: Colors.grey[300],
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Padding(
@@ -269,11 +312,13 @@ class _EditEventSheetState extends State<EditEventSheet> {
                               children: [
                                 CheckboxListTile(
                                   value: needEndDate,
-                                  checkColor: c,
-                                  title: const Text(
+                                  //checkColor: c,
+                                  activeColor: Colors.purple[400],
+
+                                  title: Text(
                                     "Set End Date",
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: Colors.purple[400],
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -306,8 +351,8 @@ class _EditEventSheetState extends State<EditEventSheet> {
                             const Text(
                               "Details",
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
+                                color: Colors.black87,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -320,6 +365,7 @@ class _EditEventSheetState extends State<EditEventSheet> {
                                 maxLines: 8,
                                 decoration: const InputDecoration(
                                   hintText: "Write Event Details",
+                                  hintStyle: TextStyle(fontSize: 15),
                                 ),
                               ),
                             ),

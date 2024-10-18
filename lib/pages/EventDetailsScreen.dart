@@ -21,7 +21,7 @@ class EventDetailsScreen extends StatefulWidget {
 class _EventDetailsScreenState extends State<EventDetailsScreen> {
   DateFormat format = DateFormat('MMM d, y - hh:mm a');
   FontWeight timerWeight = FontWeight.w900;
-  Color timerColor = Colors.purple;
+  Color timerColor = Colors.purple[300]!;
   final dateTimeNow = DateTime.now();
   Timer? _timer;
 
@@ -84,10 +84,11 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Event Details",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         centerTitle: true,
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.purple[400],
       ),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -97,8 +98,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               // Title and date container
               Container(
                 decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        colors: [Colors.blueGrey[700]!, Colors.blueGrey[400]!]),
+                    color: event.backgroundColor,
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: const [
                       BoxShadow(
@@ -125,15 +125,15 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             children: [
                               Text(format.format(event.dateTime),
                                   style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[400],
+                                      //fontWeight: FontWeight.bold,
+                                      color: Colors.grey[100],
                                       fontSize: 15)),
                               (event.needEndDate)
                                   ? Text(
                                       "to: ${format.format(event.endDateTime!)}",
                                       style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey[400],
+                                          //fontWeight: FontWeight.bold,
+                                          color: Colors.grey[100],
                                           fontSize: 15))
                                   : const SizedBox.shrink()
                             ],
@@ -143,8 +143,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,
-                                    builder: (context) =>
-                                        EditEventSheet(eventIdx: eventIdx, isRestore: false,));
+                                    builder: (context) => EditEventSheet(
+                                          eventIdx: eventIdx,
+                                          isRestore: false,
+                                        ));
                               },
                               icon: const Icon(Icons.edit_rounded,
                                   size: 20, color: Colors.white)),
@@ -162,10 +164,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                 padding: const EdgeInsets.all(12.0),
                 child: Container(
                   decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [
-                        Colors.purple.shade300,
-                        Colors.blueGrey.shade700
-                      ], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                      gradient: LinearGradient(
+                          colors: [Colors.grey[200]!, event.backgroundColor],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: const [
                         BoxShadow(
@@ -188,18 +190,15 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 eventIdx: eventIdx,
                                 eventHistoryUpdate: eventHistoryUpdate);
 
-                                return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildTimer(value: '0', title: 'Days'),
-                          _buildTimer(
-                              value:'00', title: 'Hours'),
-                          _buildTimer(
-                              value: '00', title: 'Minutes'),
-                          _buildTimer(
-                              value: '00', title: 'Seconds'),
-                        ],
-                      );
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildTimer(value: '0', title: 'Days'),
+                            _buildTimer(value: '00', title: 'Hours'),
+                            _buildTimer(value: '00', title: 'Minutes'),
+                            _buildTimer(value: '00', title: 'Seconds'),
+                          ],
+                        );
                       }
 
                       Map<String, String> durations =
@@ -229,7 +228,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   children: [
                     const Text("Details",
                         style: TextStyle(
-                            color: Colors.white,
+                            color: Colors.black,
                             fontSize: 20,
                             fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
@@ -237,7 +236,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Container(
                         decoration: BoxDecoration(
-                            color: Colors.blueGrey[700],
+                            color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(15)),
                         child: Padding(
                           padding: const EdgeInsets.all(15.0),
@@ -245,13 +244,13 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               event.details.isEmpty
-                                  ? Center(
+                                  ? const Center(
                                       child: Text("No Details",
-                                          style: TextStyle(
-                                              color: Colors.grey[400])))
+                                          style:
+                                              TextStyle(color: Colors.white)))
                                   : Text(event.details,
                                       style:
-                                          const TextStyle(color: Colors.white)),
+                                          TextStyle(color: Colors.grey[700]!)),
                             ],
                           ),
                         ),
@@ -273,8 +272,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
 Widget _buildTitle(String title) {
   return Text(title,
-      style: TextStyle(
-          fontWeight: FontWeight.bold, color: Colors.grey[400], fontSize: 10));
+      style: const TextStyle(
+          fontWeight: FontWeight.bold, color: Colors.white, fontSize: 10));
 }
 
 Map<String, String> getDurationAndUnit(DateTime dateTime) {

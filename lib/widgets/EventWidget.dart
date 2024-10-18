@@ -58,7 +58,7 @@ class _EventWidgetState extends State<EventWidget> {
         builder: (context, eventProvider, child) {
           return Dismissible(
             key: Key(event.id),
-            direction: DismissDirection.endToStart,
+            direction: DismissDirection.startToEnd,
             background: Container(
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
@@ -115,7 +115,7 @@ class _EventWidgetState extends State<EventWidget> {
                 padding: const EdgeInsets.all(15),
                 foregroundDecoration: event.needEndDate
                     ? RotatedCornerDecoration.withColor(
-                        color: Colors.purple,
+                        color: Colors.purple[400]!,
                         spanBaselineShift: 4,
                         badgeSize: Size(h * 0.075, h * 0.075),
                         badgeCornerRadius: const Radius.circular(15),
@@ -129,8 +129,7 @@ class _EventWidgetState extends State<EventWidget> {
                         ))
                     : null,
                 decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        colors: [Colors.blueGrey[700]!, Colors.blueGrey[400]!]),
+                    color: event.backgroundColor,
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: const [
                       BoxShadow(
@@ -182,7 +181,7 @@ class _EventWidgetState extends State<EventWidget> {
                                   event.needNotify
                                       ? Icons.notifications_active
                                       : Icons.notifications_off,
-                                  color: Colors.purple,
+                                  color: Colors.purple[300],
                                   size: 20,
                                 ),
                               ),
@@ -192,8 +191,8 @@ class _EventWidgetState extends State<EventWidget> {
                                 children: [
                                   Text(format.format(event.dateTime),
                                       style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey[400],
+                                          //fontWeight: FontWeight.bold,
+                                          color: Colors.grey[100],
                                           fontSize: 12,
                                           shadows: const [
                                             Shadow(
@@ -204,8 +203,8 @@ class _EventWidgetState extends State<EventWidget> {
                                       ? Text(
                                           "to: ${format.format(event.endDateTime!)}",
                                           style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.grey[400],
+                                            //fontWeight: FontWeight.bold,
+                                            color: Colors.grey[100],
                                             fontSize: 12,
                                             shadows: const [
                                               Shadow(
@@ -235,8 +234,8 @@ class _EventWidgetState extends State<EventWidget> {
                                   height: 100,
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10)),
-                                  child: const VerticalDivider(
-                                      color: Colors.black, thickness: 2)),
+                                  child: VerticalDivider(
+                                      color: Colors.white70, thickness: 2)),
                             ),
                             Consumer<EventProvider>(
                               builder: (context, eventProvider, child) {

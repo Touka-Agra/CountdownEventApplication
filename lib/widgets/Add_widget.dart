@@ -11,7 +11,7 @@ class AddWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10.0),
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16.0)),
       ),
       child: Column(
@@ -21,7 +21,10 @@ class AddWidget extends StatelessWidget {
             padding: EdgeInsets.all(8.0),
             child: Text(
               "Choose an option",
-              style: TextStyle(color: Colors.white, fontSize: 20),
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
             ),
           ),
           TextButton(
@@ -35,8 +38,10 @@ class AddWidget extends StatelessWidget {
               style: ButtonStyle(
                   shape: MaterialStateProperty.all(RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15))),
-                  backgroundColor: MaterialStateProperty.all(Colors.black)),
-              child: const Text("Add Event")),
+                  backgroundColor:
+                      MaterialStateProperty.all(Colors.purple[400])),
+              child: const Text("Add Event",
+                  style: TextStyle(color: Colors.white))),
           TextButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -46,8 +51,12 @@ class AddWidget extends StatelessWidget {
               style: ButtonStyle(
                   shape: MaterialStateProperty.all(RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15))),
-                  backgroundColor: MaterialStateProperty.all(Colors.black)),
-              child: const Text("Add Task"))
+                  backgroundColor:
+                      MaterialStateProperty.all(Colors.purple[400])),
+              child: const Text(
+                "Add Task",
+                style: TextStyle(color: Colors.white),
+              ))
         ],
       ),
     );

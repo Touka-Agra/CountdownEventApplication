@@ -40,7 +40,9 @@ class EventHistoryWidget extends StatelessWidget {
                 ),
                 boxShadow: const [
                   BoxShadow(
-                      color: Colors.amber, blurRadius: 10, offset: Offset(0, 3)),
+                      color: Colors.amber,
+                      blurRadius: 10,
+                      offset: Offset(0, 3)),
                 ]),
             child: const Padding(
               padding: EdgeInsets.all(8.0),
@@ -80,12 +82,13 @@ class EventHistoryWidget extends StatelessWidget {
                     context: context,
                     isScrollControlled: true,
                     builder: (context) => EditEventSheet(
-                          eventIdx: eventIdx, isRestore: true,
+                          eventIdx: eventIdx,
+                          isRestore: true,
                         ));
               } else {
                 EventHistory eventHistoryUpdate = EventHistory(
                     inHistory: false, isPassed: isPassed, reason: "");
-        
+
                 Provider.of<EventProvider>(context, listen: false)
                     .updateHistoryState(
                         eventIdx: eventIdx,
@@ -93,9 +96,12 @@ class EventHistoryWidget extends StatelessWidget {
               }
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20),
               foregroundDecoration: RotatedCornerDecoration.withColor(
-                  color: Colors.purple,
+                  color: event.eventHistory.reason != "Deleted"
+                      ? Colors.grey[500]!
+                      : Colors.grey[600]!,
                   spanBaselineShift: 4,
                   badgeSize: Size(h * 0.075, h * 0.075),
                   badgeCornerRadius: const Radius.circular(15),
@@ -103,11 +109,12 @@ class EventHistoryWidget extends StatelessWidget {
                       BadgeShadow(color: Colors.grey[300]!, elevation: 10),
                   textSpan: TextSpan(
                     text: event.eventHistory.reason,
-                    style: const TextStyle(fontSize: 8),
+                    style: const TextStyle(
+                      fontSize: 8,
+                    ),
                   )),
               decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      colors: [Colors.blueGrey[700]!, Colors.blueGrey[400]!]),
+                  color: event.backgroundColor,
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: const [
                     BoxShadow(
@@ -131,7 +138,9 @@ class EventHistoryWidget extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                               shadows: [
-                                Shadow(color: Colors.white54, offset: Offset(0.5, 0.5))
+                                Shadow(
+                                    color: Colors.white54,
+                                    offset: Offset(0.5, 0.5))
                               ]),
                           overflow: TextOverflow.ellipsis, // Handle overflow
                           maxLines: 1, // Allow up to 2 lines
@@ -143,22 +152,26 @@ class EventHistoryWidget extends StatelessWidget {
                             Text(
                               format.format(event.dateTime),
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[400],
+                                  //fontWeight: FontWeight.bold,
+                                  color: Colors.grey[100],
                                   fontSize: 12,
                                   shadows: const [
-                                    Shadow(color: Colors.white54, offset: Offset(0.5, 0.5))
+                                    Shadow(
+                                        color: Colors.white54,
+                                        offset: Offset(0.5, 0.5))
                                   ]),
                             ),
                             if (event.needEndDate)
                               Text(
                                 format.format(event.endDateTime!),
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[400],
+                                  //fontWeight: FontWeight.bold,
+                                  color: Colors.grey[100],
                                   fontSize: 12,
                                   shadows: const [
-                                    Shadow(color: Colors.white54, offset: Offset(0.5, 0.5))
+                                    Shadow(
+                                        color: Colors.white54,
+                                        offset: Offset(0.5, 0.5))
                                   ],
                                 ),
                               ),

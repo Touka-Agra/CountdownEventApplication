@@ -14,20 +14,19 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
-  int selectedIdx=1;
-  int changeIdx=0;
+  int selectedIdx = 1;
+  int changeIdx = 0;
 
   @override
-  void initState(){
-    AwesomeNotifications().isNotificationAllowed().then((isAllowed){
-      if(!isAllowed){
+  void initState() {
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+      if (!isAllowed) {
         AwesomeNotifications().requestPermissionToSendNotifications();
       }
     });
     super.initState();
-  
-
   }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> screens = [
@@ -38,24 +37,22 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return Scaffold(
       body: screens[changeIdx],
       bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: Colors.black,
-        buttonBackgroundColor: Colors.purple,
-        color: Colors.blueGrey,
+        backgroundColor: Colors.white,
+        buttonBackgroundColor: Colors.purple[400],
+        color: Colors.purple[400]!,
         height: 60,
         index: 1,
         onTap: (value) {
           setState(() {
-            if(value==1){
-              selectedIdx=value;
+            if (value == 1) {
+              selectedIdx = value;
               showModalBottomSheet(
                   context: context, builder: (context) => const AddWidget());
-            }
-            else {
+            } else {
               selectedIdx = value;
-              changeIdx=value;
+              changeIdx = value;
             }
           });
-
         },
         items: [
           _buildNavIcons(Icons.event, "Events", selectedIdx == 0),
@@ -63,12 +60,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
           _buildNavIcons(Icons.checklist, "Todo", selectedIdx == 2),
         ],
       ),
-    );  }
+    );
+  }
 }
 
-
 Widget _buildNavIcons(IconData icon, String label, bool isSelected) {
-  Color c = Colors.grey[400]!;
+  Color c = Colors.white;
 
   return Padding(
     padding: const EdgeInsets.all(8.0),

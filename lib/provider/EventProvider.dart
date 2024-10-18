@@ -35,6 +35,7 @@ class EventProvider extends ChangeNotifier {
       'inHistory': event.eventHistory.inHistory,
       'isPassed': event.eventHistory.isPassed,
       'reason': event.eventHistory.reason,
+      'backgroundColor': event.backgroundColor.value,
       'needNotify': event.needNotify,
       'notifications': event.notifications
           .map((notification) => {
@@ -135,7 +136,7 @@ class EventProvider extends ChangeNotifier {
 
     FirebaseFirestore.instance
         .collection('events')
-        .doc(events[eventIdx].id) 
+        .doc(events[eventIdx].id)
         .update({
       'needNotify': events[eventIdx].needNotify,
     }).then((_) {
@@ -192,7 +193,8 @@ class EventProvider extends ChangeNotifier {
         'description': newEvent.details,
         'date': newEvent.dateTime.toIso8601String(),
         'needEndDate': newEvent.needEndDate,
-        'endDate': newEvent.endDateTime?.toIso8601String()
+        'endDate': newEvent.endDateTime?.toIso8601String(),
+        'backgroundColor': newEvent.backgroundColor.value
       }).then((_) {
         print("Event updated in Firestore");
       }).catchError((error) {
@@ -238,6 +240,7 @@ class EventProvider extends ChangeNotifier {
             }).toList(),
             needEndDate: data['needEndDate'],
             needNotify: data['needNotify'],
+            backgroundColor: Color(data['backgroundColor']),
             id: doc.id,
           );
 

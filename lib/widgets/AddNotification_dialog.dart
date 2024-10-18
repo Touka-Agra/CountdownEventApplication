@@ -113,6 +113,7 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
       "Minutes": _generateTimeList("Minutes"),
     };
     return Dialog(
+      backgroundColor: Colors.white,
       child: Container(
         height: MediaQuery.of(context).size.height * 0.4,
         child: Column(
@@ -125,7 +126,7 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
                 style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                    color: Colors.black),
               ),
             ),
             Expanded(
@@ -173,7 +174,9 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
               child: Container(
                   padding: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
-                      color: Colors.blueGrey,
+                      color: Provider.of<EventProvider>(context, listen: false)
+                          .events[widget.eventIdx]
+                          .backgroundColor,
                       borderRadius: BorderRadius.circular(15)),
                   child: Text(
                     "Notify on: ${f.format(notificationDate)}",
@@ -210,7 +213,8 @@ class _AddNotificationDialogState extends State<AddNotificationDialog> {
                 style: ButtonStyle(
                     shape: WidgetStateProperty.all(RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
-                    backgroundColor: WidgetStateProperty.all(Colors.purple)),
+                    backgroundColor:
+                        WidgetStateProperty.all(Colors.purple[400])),
                 icon: const Icon(
                   Icons.check_circle,
                   color: Colors.white,
@@ -228,20 +232,22 @@ Future<void> _scheduleNotification(
     {required DateTime notificationDate,
     required int uniqueId,
     required Event event}) async {
+  Duration duration = event.dateTime.difference(DateTime.now());
 
-       Duration duration = event.dateTime.difference(DateTime.now());
-    
-    late String timeRemaining;
+  late String timeRemaining;
 
-      if (duration.inDays > 0) {
-        timeRemaining = 'in ${duration.inDays} day${duration.inDays > 1 ? 's' : ''}';
-      } else if (duration.inHours > 0) {
-        timeRemaining = 'in ${duration.inHours} hour${duration.inHours > 1 ? 's' : ''}';
-      } else if (duration.inMinutes > 0) {
-        timeRemaining = 'in ${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''}';
-      } else {
-        timeRemaining = 'now';
-      }
+  if (duration.inDays > 0) {
+    timeRemaining =
+        'in ${duration.inDays} day${duration.inDays > 1 ? 's' : ''}';
+  } else if (duration.inHours > 0) {
+    timeRemaining =
+        'in ${duration.inHours} hour${duration.inHours > 1 ? 's' : ''}';
+  } else if (duration.inMinutes > 0) {
+    timeRemaining =
+        'in ${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''}';
+  } else {
+    timeRemaining = 'now';
+  }
 
   await AwesomeNotifications().createNotification(
     content: NotificationContent(

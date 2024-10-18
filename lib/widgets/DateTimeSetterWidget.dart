@@ -34,7 +34,7 @@ class DateTimeSetterWidget extends StatelessWidget {
         children: [
           Container(
               decoration: BoxDecoration(
-                  color: Colors.grey[700],
+                  color: Colors.grey[500],
                   borderRadius: BorderRadius.circular(20)),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -60,10 +60,10 @@ class DateTimeSetterWidget extends StatelessWidget {
                       icon: const Icon(Icons.timer_outlined)),
                 ],
               )),
-          SizedBox(width: MediaQuery.of(context).size.width*0.03),
+          SizedBox(width: MediaQuery.of(context).size.width * 0.03),
           Container(
             decoration: BoxDecoration(
-                color: Colors.grey[700],
+                color: Colors.grey[500],
                 borderRadius: BorderRadius.circular(15)),
             child: Padding(
               padding: const EdgeInsets.all(12.0),
@@ -73,7 +73,7 @@ class DateTimeSetterWidget extends StatelessWidget {
                       : dateTimeProvider.endDateTime),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[400],
+                      color: Colors.grey[200],
                       fontSize: 15)),
             ),
           ),

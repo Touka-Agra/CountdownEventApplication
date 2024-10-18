@@ -77,11 +77,6 @@ class _CalendarAppState extends State<CalendarApp> {
         }
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          themeMode: ThemeMode.dark,
-          darkTheme: ThemeData.dark().copyWith(
-            scaffoldBackgroundColor: Colors.transparent,
-            hintColor: Colors.white,
-          ),
           home: BottomNavBar(),
         );
       },

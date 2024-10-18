@@ -19,9 +19,11 @@ class NotificationWidget extends StatelessWidget {
       child: Consumer<EventProvider>(
         builder: (context, eventProvider, child) {
           return Opacity(
-            opacity: (eventIdx >= 0 && eventIdx < eventProvider.events.length && eventProvider.events[eventIdx].needNotify != null) 
-  ? (eventProvider.events[eventIdx].needNotify ? 1.0 : 0.5)
-  : 0.5,  // Default opacity if invalid index or null
+            opacity: (eventIdx >= 0 &&
+                    eventIdx < eventProvider.events.length &&
+                    eventProvider.events[eventIdx].needNotify != null)
+                ? (eventProvider.events[eventIdx].needNotify ? 1.0 : 0.5)
+                : 0.5, // Default opacity if invalid index or null
 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +36,7 @@ class NotificationWidget extends StatelessWidget {
                     children: [
                       const Text("Set Notification",
                           style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontSize: 20,
                               fontWeight: FontWeight.bold)),
                       Switch(
@@ -50,11 +52,14 @@ class NotificationWidget extends StatelessWidget {
                                   eventProvider.events[eventIdx]);
                             }
                           },
-                          activeColor: Colors.purple,
+                          activeColor: Colors.purple[400],
                           thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
                               (Set<WidgetState> states) {
                             if (states.contains(WidgetState.selected)) {
-                              return const Icon(Icons.notifications_active);
+                              return const Icon(
+                                Icons.notifications_active,
+                                color: Colors.white,
+                              );
                             }
                             return null;
                           }))
@@ -77,7 +82,9 @@ class NotificationWidget extends StatelessWidget {
                           itemCount: notifications.length,
                           itemBuilder: (context, index) {
                             return _buildNotification(
-                                notifications[index], eventIdx);
+                                notifications[index],
+                                eventIdx,
+                                eventProvider.events[eventIdx].backgroundColor);
                           });
                     }),
                   ),
@@ -105,7 +112,7 @@ class NotificationWidget extends StatelessWidget {
                           shape: WidgetStateProperty.all(RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15))),
                           backgroundColor:
-                              WidgetStateProperty.all(Colors.purple)),
+                              WidgetStateProperty.all(Colors.purple[400])),
                       child: const Padding(
                         padding: EdgeInsets.all(5.0),
                         child: Text(
@@ -128,7 +135,8 @@ class NotificationWidget extends StatelessWidget {
   }
 }
 
-Widget _buildNotification(NotificationId notification, int eventIdx) {
+Widget _buildNotification(
+    NotificationId notification, int eventIdx, Color eventColor) {
   DateFormat format = DateFormat('MMM d, y - hh:mm a');
 
   return Consumer<EventProvider>(builder: (context, eventProvider, child) {
@@ -136,7 +144,7 @@ Widget _buildNotification(NotificationId notification, int eventIdx) {
         padding: const EdgeInsets.all(5.0),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.blueGrey,
+            color: eventColor,
             borderRadius: BorderRadius.circular(15),
           ),
           child:
@@ -171,21 +179,23 @@ Widget _buildNotification(NotificationId notification, int eventIdx) {
 
 Future<void> _scheduleNotificationsForEvent(Event event) async {
   for (NotificationId notification in event.notifications) {
-
     Duration duration = event.dateTime.difference(DateTime.now());
-    
+
     late String timeRemaining;
 
-      if (duration.inDays > 0) {
-        timeRemaining = 'in ${duration.inDays} day${duration.inDays > 1 ? 's' : ''}';
-      } else if (duration.inHours > 0) {
-        timeRemaining = 'in ${duration.inHours} hour${duration.inHours > 1 ? 's' : ''}';
-      } else if (duration.inMinutes > 0) {
-        timeRemaining = 'in ${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''}';
-      } else {
-        timeRemaining = 'now';
-      }
-    
+    if (duration.inDays > 0) {
+      timeRemaining =
+          'in ${duration.inDays} day${duration.inDays > 1 ? 's' : ''}';
+    } else if (duration.inHours > 0) {
+      timeRemaining =
+          'in ${duration.inHours} hour${duration.inHours > 1 ? 's' : ''}';
+    } else if (duration.inMinutes > 0) {
+      timeRemaining =
+          'in ${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''}';
+    } else {
+      timeRemaining = 'now';
+    }
+
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: notification.id,

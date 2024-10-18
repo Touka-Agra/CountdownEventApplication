@@ -18,7 +18,6 @@ class EventForm extends StatefulWidget {
 class _EventFormState extends State<EventForm> {
   final _formKey = GlobalKey<FormState>();
 
-  Color c = Colors.purple;
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -26,12 +25,22 @@ class _EventFormState extends State<EventForm> {
   String typingTitle = "";
   bool needEndDate = false;
 
+  Color selectedColor = Color(0xFFFFB5B5); 
+  final List<Color> availableColors = [
+    const Color(0xFFC4D4B1),
+    const Color(0xFFF1B598),
+    const Color(0xFFEFD9AA),
+    const Color(0xFFFFB5B5),
+    const Color(0xFFD7C2D8),
+    const Color(0xFFB3D9E1),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
-        color: Colors.black,
+        color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
         boxShadow: [
           BoxShadow(color: Colors.purple, spreadRadius: 2, blurRadius: 5)
@@ -49,9 +58,9 @@ class _EventFormState extends State<EventForm> {
                   const Text(
                     "Add Event",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontWeight: FontWeight.w800,
-                      fontSize: 18,
+                      fontSize: 25,
                     ),
                   ),
                   Expanded(
@@ -79,6 +88,8 @@ class _EventFormState extends State<EventForm> {
                                     isPassed: false,
                                     reason: '',
                                     inHistory: false),
+                                backgroundColor:
+                                    selectedColor, // store the selected color
                               );
 
                               if (needEndDate) {
@@ -102,10 +113,8 @@ class _EventFormState extends State<EventForm> {
                                             context,
                                             listen: false)
                                         .events
-                                        .length-1;
-
-                                print(
-                                    "''''${Provider.of<EventProvider>(context, listen: false).events[eventIdx].title}");
+                                        .length -
+                                    1;
 
                                 bool isPassed = Provider.of<EventProvider>(
                                         context,
@@ -151,18 +160,10 @@ class _EventFormState extends State<EventForm> {
                               }
                             }
                           },
-                          style: ButtonStyle(
-                            shape: WidgetStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                            backgroundColor:
-                                WidgetStateProperty.all(Colors.purple),
-                          ),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.check_circle,
-                            color: Colors.white,
+                            color: Colors.purple[400],
+                            size: 30,
                           ),
                         ),
                       ),
@@ -176,9 +177,54 @@ class _EventFormState extends State<EventForm> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
+                      // Color Picker
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Select Background Color",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: availableColors.map((color) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedColor = color;
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 30,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: color,
+                                      border: Border.all(
+                                        color: selectedColor == color
+                                            ? Colors.black
+                                            : Colors.transparent,
+                                        width: 3,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey[700],
+                          color: Colors.grey[300],
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Padding(
@@ -204,7 +250,7 @@ class _EventFormState extends State<EventForm> {
                                   hintText: "Title",
                                   helperStyle: TextStyle(
                                     color: typingTitle.length < 32
-                                        ? Colors.white
+                                        ? Colors.black
                                         : Colors.red,
                                   ),
                                   focusColor: Colors.purple,
@@ -232,11 +278,12 @@ class _EventFormState extends State<EventForm> {
                               children: [
                                 CheckboxListTile(
                                   value: needEndDate,
-                                  checkColor: c,
-                                  title: const Text(
+                                  //checkColor: c,
+                                  activeColor: Colors.purple[400],
+                                  title: Text(
                                     "Set End Date",
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: Colors.purple[400],
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -250,9 +297,7 @@ class _EventFormState extends State<EventForm> {
                                 ),
                                 IgnorePointer(
                                   ignoring: !needEndDate,
-                                  child: DateTimeSetterWidget(
-                                    isStart: false,
-                                  ),
+                                  child: DateTimeSetterWidget(isStart: false),
                                 ),
                               ],
                             ),
@@ -269,8 +314,8 @@ class _EventFormState extends State<EventForm> {
                             const Text(
                               "Details",
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
+                                color: Colors.black87,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -282,8 +327,8 @@ class _EventFormState extends State<EventForm> {
                                 controller: _descriptionController,
                                 maxLines: 8,
                                 decoration: const InputDecoration(
-                                  hintText: "Write Event Details",
-                                ),
+                                    hintText: "Write Event Details",
+                                    hintStyle: TextStyle(fontSize: 15)),
                               ),
                             ),
                           ],
@@ -299,15 +344,4 @@ class _EventFormState extends State<EventForm> {
       ),
     );
   }
-}
-
-Widget _buildTitle(String title) {
-  return Text(
-    title,
-    style: TextStyle(
-      fontWeight: FontWeight.bold,
-      color: Colors.grey[400],
-      fontSize: 10,
-    ),
-  );
 }

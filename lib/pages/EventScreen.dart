@@ -36,6 +36,8 @@ class _EventScreenState extends State<EventScreen>
         title: "Your Events",
         tabBar: TabBar(
           controller: _tabController,
+          indicatorColor: Colors.purple[400]!,
+          labelColor: Colors.purple[400]!,
           tabs: const [
             Tab(text: "Upcoming"),
             Tab(text: "History"),
@@ -43,6 +45,7 @@ class _EventScreenState extends State<EventScreen>
         ),
         context: context,
       ),
+      backgroundColor: Colors.white,
       body: TabBarView(
         controller: _tabController,
         children: [

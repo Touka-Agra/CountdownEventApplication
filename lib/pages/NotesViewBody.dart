@@ -167,15 +167,14 @@ class _NotesViewBodyState extends State<NotesViewBody>
   Widget build(BuildContext context) {
     final notesProvider = Provider.of<NotesProvider>(context);
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       appBar: getAppBar(
         context: context,
         title: "My Notes",
         tabBar: TabBar(
           controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: Colors.blue,
+          indicatorColor: Colors.purple[400]!,
+          labelColor: Colors.purple[400]!,
           tabs: const [
             Tab(text: 'Active Tasks'),
             Tab(text: 'History'),
@@ -267,8 +266,7 @@ class _NotesViewBodyState extends State<NotesViewBody>
                               CircleAvatar(
                                 radius:
                                     30, // Reduced radius for a smaller avatar
-                                backgroundColor:
-                                    Color.fromARGB(255, 123, 147, 180),
+                                backgroundColor: Color(0xFFD6BEDA),
                                 child: Text(
                                   "${DateFormat('hh:mm a').format((notesProvider.activeNotes[index]['time'] as DateTime) // Ensure it's a DateTime
                                       )}",
@@ -283,14 +281,11 @@ class _NotesViewBodyState extends State<NotesViewBody>
                                   margin: const EdgeInsets.symmetric(
                                       vertical: 8, horizontal: 10),
                                   decoration: BoxDecoration(
-                                    color: Color.fromARGB(255, 123, 176, 180),
+                                    color: Color(0xFFC8A2CB),
                                     borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                        color:
-                                            Color.fromARGB(255, 123, 176, 180)),
-                                    boxShadow: const [
+                                    boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black26,
+                                        color: Colors.grey[400]!,
                                         blurRadius: 4,
                                         offset: Offset(2, 2),
                                       ),
