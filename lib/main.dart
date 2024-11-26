@@ -66,20 +66,21 @@ class _CalendarAppState extends State<CalendarApp> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: Provider.of<EventProvider>(context, listen: false).fetchEvents(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        return MaterialApp(
+    // return FutureBuilder(
+    //   future: Provider.of<EventProvider>(context, listen: false).fetchEvents(),
+    //   builder: (context, snapshot) {
+    //     if (snapshot.connectionState == ConnectionState.waiting) {
+    //       return const Center(child: CircularProgressIndicator());
+    //     }
+    //     if (snapshot.hasError) {
+    //       return Center(child: Text('Error: ${snapshot.error}'));
+    //     }
+        return 
+        MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: BottomNavBar(),
+          home: SignUpScreen(),
         );
-      },
-    );
+    //   },
+    // );
   }
 }

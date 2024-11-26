@@ -1,3 +1,4 @@
+import 'package:countdown_event/pages/LoginScreen.dart';
 import 'package:countdown_event/pages/SignUpScreen.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +25,7 @@ PreferredSizeWidget getAppBar(
       IconButton(
         onPressed: () {
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => SignUpScreen()));
+              context, MaterialPageRoute(builder: (context) => LoginScreen()));
         },
         icon: const Icon(Icons.logout),
         color: c,

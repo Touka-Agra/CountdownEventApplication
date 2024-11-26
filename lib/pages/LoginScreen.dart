@@ -1,20 +1,24 @@
 import 'package:countdown_event/Customs/BottomNavBar.dart';
 import 'package:flutter/material.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
 import '../widgets/CustomButton.dart';
-import '../widgets/InputField.dart';
+import '../widgets/TextFormFieldCustom.dart';
 import 'SignUpScreen.dart';
 
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
-class LoginScreen extends StatelessWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
-   LoginScreen({super.key});
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -27,32 +31,48 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
+                Text(
                   'Welcome back!',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.purple,
+                    color: Colors.purple[400],
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Text(
+                Text(
                   'Enter your details below',
                   style: TextStyle(
                     fontSize: 18.0,
-                    color: Color.fromARGB(255, 158, 158, 158),
+                    color: Colors.grey[300],
                   ),
                 ),
                 const SizedBox(height: 30),
-                InputField(
-                  hintText: 'Email Address',
-                  obscureText: false,
+                TextInputField(
                   controller: emailController,
+                  hintText: 'Email Address',
+                  prefixIcon: Icons.email_outlined,
+                  obscureText: false,
                 ),
-                InputField(
-                  hintText: 'Password',
-                  obscureText: true,
+                const SizedBox(height: 10),
+                TextInputField(
                   controller: passwordController,
+                  hintText: 'Password',
+                  prefixIcon: Icons.lock_outline,
+                  obscureText: _obscurePassword,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.purple[400],
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
@@ -69,9 +89,9 @@ class LoginScreen extends StatelessWidget {
                   onPressed: () {
                     _resetPassword(context);
                   },
-                  child: const Text(
+                  child: Text(
                     'Forgot your password?',
-                    style: TextStyle(color: Colors.purple),
+                    style: TextStyle(color: Colors.purple[400]),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -80,26 +100,32 @@ class LoginScreen extends StatelessWidget {
                 CustomButton(
                   text: 'Google',
                   onPressed: () {
-                    _signInWithGoogle(context); 
+                    _signInWithGoogle(context);
                   },
                   isGoogleButton: true,
                 ),
                 const SizedBox(height: 20),
-                const Text("Don't have an account?"),
-                TextButton(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Don't have an account?"),
+                     TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  SignUpScreen(),
+                        builder: (context) => SignUpScreen(),
                       ),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     'Get Started',
-                    style: TextStyle(color: Colors.purple),
+                    style: TextStyle(color: Colors.purple[400]),
                   ),
                 ),
+                  ],
+                ),
+               
               ],
             ),
           ),
@@ -134,16 +160,17 @@ class LoginScreen extends StatelessWidget {
   Future<void> _signInWithGoogle(BuildContext context) async {
     try {
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
 
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
-      
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => BottomNavBar()),
@@ -187,7 +214,8 @@ class LoginScreen extends StatelessWidget {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Password reset link sent! Check your email.'),
+                    content:
+                        Text('Password reset link sent! Check your email.'),
                   ),
                 );
               }).catchError((error) {
